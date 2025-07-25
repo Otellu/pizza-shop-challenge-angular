@@ -573,19 +573,26 @@ curl -X POST http://localhost:5000/api/webhook/delivery-update \
 
 ### Quality Standards:
 
-- [ ] All TODO comments addressed
-- [ ] Code follows existing patterns and conventions
-- [ ] Proper error handling and validation
-- [ ] Clean, readable code with good naming
-- [ ] Features work as specified
+- [ ] Modern Angular 18+ features used (signals, control flow, standalone components)
+- [ ] Proper TypeScript implementation with strict typing
+- [ ] RxJS operators used correctly with memory leak prevention
+- [ ] Responsive design with Tailwind CSS
+- [ ] Proper error handling and loading states
 
 ### Testing Your Implementation:
 
-- [ ] Filter and search functionality works
-- [ ] Infinite scroll loads more pizzas
-- [ ] Order creation and history work
-- [ ] Webhook updates order status
-- [ ] Admin dashboard displays correctly
+- [ ] Pizza search, filtering, and infinite scroll work smoothly
+- [ ] Order creation integrates with cart system
+- [ ] Admin dashboard shows real-time order updates
+- [ ] Complaint forms validate properly and submit successfully
+- [ ] No console errors or memory leaks
+
+### Additional Requirements:
+
+- [ ] Write **one comprehensive test** for any feature you choose
+- [ ] Use NgRx Signals for state management
+- [ ] Implement proper change detection optimization
+- [ ] Handle edge cases and error states gracefully
 
 ---
 
@@ -595,17 +602,29 @@ curl -X POST http://localhost:5000/api/webhook/delivery-update \
 
 Your challenge submission will be evaluated on:
 
-- Clean, readable code with consistent formatting
-- Proper naming conventions and code organization
-- Following existing project patterns and conventions
-- Appropriate use of modern JavaScript/React features
-- Error handling and validation implementation
+**Angular Expertise (40%):**
+- Modern Angular 18+ features (signals, control flow, standalone components)
+- Proper TypeScript usage with strict mode
+- Efficient change detection strategies
+- Component architecture and reusability
 
-- **Feature 1**: Filter/Sort/Pagination functionality
-- **Feature 2**: Order Model schema design and testing
-- **Feature 3**: Webhook implementation and status updates
-- All tests passing (especially Order model tests)
-- Requirements met as specified in each task
+**RxJS & State Management (25%):**
+- Advanced RxJS operators and patterns
+- Proper subscription management (no memory leaks)
+- State synchronization across components
+- Error handling and retry strategies
+
+**Performance & UX (20%):**
+- Smooth animations and transitions
+- Loading states and error boundaries
+- Responsive design implementation
+- Real-time user experience
+
+**Code Quality (15%):**
+- Clean, readable, maintainable code
+- Proper error handling
+- Test implementation
+- Following Angular style guide
 
 ---
 
@@ -614,21 +633,23 @@ Your challenge submission will be evaluated on:
 #### **Run All Tests**
 
 ```bash
-# Backend tests
+# Backend tests (for evaluation)
 cd backend
 npm test
 
-# Frontend tests
-cd frontend
+# Frontend tests (Angular)
+cd frontend-angular
 npm test
 ```
 
 #### **Test Specific Features**
 
 ```bash
-# Test Order Model implementation
+# Test backend functionality
 cd backend
-npm test order.model.test.js
+npm run feat-1:test  # Pizza API tests
+npm run feat-2:test  # Order tests  
+npm run feat-3:test  # Admin tests
 
 # Test with coverage
 npm test:coverage
@@ -636,4 +657,11 @@ npm test:coverage
 # Watch mode for development
 npm test:watch
 ```
+
+#### **Write Your Own Test**
+
+Remember to write **one comprehensive test** for any feature you implement. Example locations:
+- `frontend-angular/src/app/shared/pizza-list/pizza-list.component.spec.ts`
+- `frontend-angular/src/app/pages/admin-dashboard/admin-dashboard.component.spec.ts`
+- `frontend-angular/src/app/pages/order-history/order-history.component.spec.ts`
 # pizza-shop-challenge-angular
