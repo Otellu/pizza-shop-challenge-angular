@@ -1,0 +1,19 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Show navbar only when not on error pages -->
+  @if (!shouldHideNavbar()) {
+    <app-navbar />
+  }
+  
+  <!-- Main content with top padding when navbar is shown -->
+  <div [class]="shouldHideNavbar() ? '' : 'pt-16'">
+    <router-outlet />
+  </div>
+  
+  <!-- Show footer only when not on error pages -->
+  @if (!shouldHideNavbar()) {
+    <app-footer />
+  }
+  
+  <!-- Toast notifications -->
+  <app-toast-container />
+</div>

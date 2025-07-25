@@ -1,0 +1,65 @@
+<nav class="w-full bg-white shadow fixed top-0 left-0 z-10">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between h-16 items-center">
+      <div class="flex-shrink-0 flex items-center">
+        <a
+          routerLink="/"
+          class="text-2xl font-bold text-red-600 hover:text-red-700 transition"
+        >
+          🍕 PizzaShop
+        </a>
+      </div>
+      <div class="flex items-center gap-4">
+        @if (authService.isAuthenticated() && !authService.isAdmin()) {
+          <button
+            class="relative flex items-center bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-4 rounded transition"
+            (click)="navigateToCheckout()"
+          >
+  
+            Cart
+            <span class="ml-2 bg-red-600 text-white rounded-full px-2 py-0.5 text-xs">
+              {{ cartService.totalItems() }}
+            </span>
+          </button>
+          <button
+            class="relative flex items-center bg-blue-100 hover:bg-blue-200 text-blue-700 font-bold py-2 px-4 rounded transition ml-2"
+            (click)="navigateToOrders()"
+          >
+       
+            History
+          </button>
+        }
+        @if (authService.isAuthenticated()) {
+          <div class="flex items-center gap-4">
+            <span class="text-gray-700 font-medium">
+              Welcome, {{ authService.user()?.name }}
+            </span>
+            <button
+              (click)="handleLogout()"
+              class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 font-semibold transition"
+            >
+              Logout
+            </button>
+          </div>
+        } @else {
+          <a
+            routerLink="/login"
+            routerLinkActive="bg-red-100 text-red-700"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="px-4 py-2 text-sm font-medium rounded transition text-gray-700 hover:text-red-600"
+          >
+            Login
+          </a>
+          <a
+            routerLink="/signup"
+            routerLinkActive="bg-red-600 text-white"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="px-4 py-2 text-sm font-medium rounded transition bg-red-500 text-white hover:bg-red-700"
+          >
+            Signup
+          </a>
+        }
+      </div>
+    </div>
+  </div>
+</nav>
