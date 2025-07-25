@@ -1,14 +1,14 @@
-# Pizza Shop Challenge
+# Pizza Shop Challenge - Angular Frontend
 
-Welcome to the Pizza Shop Challenge! This is a full-stack application where you'll be implementing key features to complete the pizza ordering system.
+Welcome to the Pizza Shop Challenge! This is an Angular frontend challenge where you'll be implementing advanced features to demonstrate senior-level Angular development skills.
 
 ### 🎯 **Your tasks** (What you need to implement)
 
-#### **Feature 1: Filter, Sort & Pagination**
+#### **Feature 1: Smart Pizza Discovery + State Management**
 
-#### **Feature 2: Order Model Design**
+#### **Feature 2: Real-Time Admin Order Dashboard**
 
-#### **Feature 3: Status update via Webhook Implementation**
+#### **Feature 3: Order Complaint Form with Advanced Validation**
 
 ---
 
@@ -33,8 +33,8 @@ Welcome to the Pizza Shop Challenge! This is a full-stack application where you'
 cd backend
 npm run dev
 
-# Terminal 2 - Frontend
-cd frontend
+# Terminal 2 - Frontend (Angular)
+cd frontend-angular
 npm start
 ```
 
@@ -55,21 +55,24 @@ npm start
 
 ---
 
-# 🎯 **TASK 1: Filter, Sort & Pagination System**
+# 🎯 **FEATURE 1: Smart Pizza Discovery + State Management**
 
 <details>
 
 <summary><i>Open instructions</i></summary>
 
-**Time Estimate**: 30-40 minutes
+**Time Estimate**: 35 minutes
 
 ## 🎬 What You're Building
 
-You'll implement a pizza browsing system that lets users:
+You'll implement an advanced pizza discovery system that demonstrates senior Angular skills:
 
-- Filter pizzas by diet type (All/Veg/Non-Veg)
-- Sort by price (Low to High, High to Low)
-- Load more pizzas as they scroll (infinite scroll)
+- **Real-time Search**: Debounced search with client-side filtering
+- **Smart Filtering**: Filter by diet type (All/Veg/Non-Veg) with state management
+- **Advanced Sorting**: Sort by price (Low→High, High→Low), name (A→Z)
+- **Infinite Scroll**: Load more pizzas on scroll using pagination
+- **Order Creation**: Create orders via POST API integration
+- **State Management**: Maintain all filter/search/sort state
 
 ## 📊 Sample Data Context
 
@@ -86,18 +89,18 @@ The database contains ~50 pizzas with these properties:
 }
 ```
 
-## 🔧 Backend Implementation
+## 🔧 Available Backend API
 
-**File**: `backend/src/controllers/pizzaController.js`
-**File**: [backend/src/controllers/pizzaController.js](./backend/src/controllers/pizzaController.js)
+**Endpoint**: `GET /api/pizzas` - Ready to use, no backend changes needed!
 
-### Query Parameters to Handle:
+### Query Parameters Available:
 
-- `veg`: `true` | `false` (optional - when omitted, shows all pizzas)
-- `sortBy`: `'price'` | `'createdAt'` (default: 'createdAt')
+- `filter`: `'veg'` | `'non-veg'` | undefined (shows all pizzas)
+- `sortBy`: `'price'` | `'name'` | `'createdAt'` (default: 'createdAt')
 - `sortOrder`: `'asc'` | `'desc'` (default: 'desc' for newest first)
 - `page`: number (default: 1)
 - `limit`: number (default: 10)
+- `search`: string (searches pizza names)
 
 ### Required Response Format:
 
@@ -115,36 +118,54 @@ The database contains ~50 pizzas with these properties:
 }
 ```
 
-### Test Your Backend:
+### Order Creation API:
 
 ```bash
-# Test in terminal:
-  npm run feat-1:test
+# Create order endpoint
+POST /api/orders
+Authorization: Bearer <token>
+
+# Body example:
+{
+  "items": [
+    { "id": "pizza1", "name": "Margherita", "price": 12.99, "quantity": 2 }
+  ],
+  "deliveryAddress": "123 Main St, City, State 12345",
+  "totalAmount": 25.98
+}
 ```
 
-## 🎨 Frontend Implementation
+## 🎨 Angular Frontend Implementation
 
-**File**: `frontend/src/components/PizzaList.js`
+**File**: `frontend-angular/src/app/shared/pizza-list/pizza-list.component.ts`
 
-### Filter Controls Required:
+### Required Angular Features:
 
-- [ ] Three buttons: "All", "Veg", "Non-Veg"
-- [ ] Active state styling for selected filter
-- [ ] Clear visual feedback when filter changes
+**Search Implementation:**
+- [ ] Real-time search input with RxJS debouncing (300ms)
+- [ ] Client-side filtering for instant results
+- [ ] Clear search functionality
 
-### Sort Controls Required:
+**Filter System:**
+- [ ] Three filter buttons: "All", "Veg", "Non-Veg"  
+- [ ] Active state styling using Angular directives
+- [ ] State management with NgRx Signals
 
-- [ ] Dropdown with options: "Default" (newest first), "Price: Low to High", "Price: High to Low"
-- [ ] Default to "Default" (sorted by createdAt desc)
-- [ ] Visual indicator of current sort option
+**Sorting Options:**
+- [ ] Dropdown with: "Default", "Price: Low→High", "Price: High→Low", "Name: A→Z"
+- [ ] Reactive sorting with immediate UI updates
+- [ ] Maintain sort state across filter changes
 
-### Infinite Scroll Required:
+**Infinite Scroll:**
+- [ ] Intersection Observer API implementation
+- [ ] Load more on scroll using pagination API
+- [ ] Loading states and error handling
+- [ ] "No more results" state management
 
-- [ ] Use Intersection Observer API
-- [ ] Load next page when user scrolls near bottom
-- [ ] Show loading spinner while fetching
-- [ ] Handle "no more results" state
-- [ ] Handle API errors gracefully
+**Order Creation:**
+- [ ] Implement order POST functionality
+- [ ] Cart integration with order creation
+- [ ] Success/error feedback with toast notifications
 
 ## ✅ Success Criteria
 
@@ -194,7 +215,7 @@ GET /api/pizzas?veg=false&page=2&limit=10
 
 ---
 
-# 🎯 **TASK 2: Order Model Design**
+# 🎯 **FEATURE 2: Real-Time Admin Order Dashboard**
 
 <details>
 
@@ -204,120 +225,92 @@ GET /api/pizzas?veg=false&page=2&limit=10
 
 ## 🎬 What You're Building
 
-You'll implement a comprehensive Order schema that demonstrates your database design skills and handles the complete pizza ordering workflow:
+You'll implement a real-time admin dashboard that demonstrates advanced Angular real-time patterns:
 
-- Customer information and delivery details
-- Order items with price snapshots for integrity
-- Status tracking with proper transitions
-- Pricing calculations and validation
-- Performance optimization with indexes
+- **Live Order Feed**: Auto-refresh order list every 3-5 seconds using RxJS polling
+- **Order Status Management**: Update order statuses with immediate UI reflection
+- **Real-Time UI Sync**: Smart polling with tab visibility optimization
+- **Admin Controls**: Quick status updates and order management
 
-## 📊 Expected Order Structure
+## 📊 Available Order Data Structure
 
-The Order model should handle data like this:
+Orders from the API will have this structure:
 
 ```javascript
 {
   "_id": "60d5f484f4b7a5b8c8f8e123",
-  "user": "60d5f484f4b7a5b8c8f8e124", // Reference to User
+  "user": {
+    "name": "John Doe",
+    "email": "john@example.com"
+  },
   "items": [
     {
-      "id": "60d5f484f4b7a5b8c8f8e125", // Pizza ID
-      "name": "Margherita",
+      "id": "60d5f484f4b7a5b8c8f8e125",
+      "name": "Margherita", 
       "price": 12.99,
       "quantity": 2
     }
   ],
   "status": "pending", // pending → confirmed → preparing → out_for_delivery → delivered
   "deliveryAddress": "123 Main St, City, State 12345",
-  "totalAmount": 25.98, // Calculated from items
+  "totalAmount": 25.98,
   "createdAt": "2024-03-15T17:30:00Z",
   "updatedAt": "2024-03-15T17:30:00Z"
 }
 ```
 
-## 🔧 Backend Implementation
+## 🔧 Available Backend APIs
 
-**File**: `backend/src/models/Order.js`
-
-### Schema Requirements:
-
-#### **1. Customer Information**
-
-- [ ] `user` field - ObjectId reference to User model (required)
-- [ ] Add index for efficient user order queries
-
-#### **2. Order Items**
-
-- [ ] `items` field - Array of mixed type objects containing:
-  - `id` (Pizza ID)
-  - `name` (Pizza name)
-  - `price` (Pizza price at time of order)
-  - `quantity` (Quantity ordered)
-- [ ] Validation to ensure at least one item
-
-#### **3. Order Status & Tracking**
-
-- [ ] `status` field - String enum with values:
-  - `"pending"` (default)
-  - `"confirmed"`
-  - `"preparing"`
-  - `"out_for_delivery"`
-  - `"delivered"`
-  - `"cancelled"`
-- [ ] Add index for status-based queries
-
-#### **4. Delivery Information**
-
-- [ ] `deliveryAddress` field - String (required)
-- [ ] Validation for minimum/maximum length
-
-#### **5. Pricing & Calculations**
-
-- [ ] Virtual field for `totalAmount` that calculates sum of (price \* quantity) for all items
-- [ ] Validation to ensure positive amounts
-
-#### **6. Timestamps**
-
-- [ ] `createdAt` and `updatedAt` - Auto-generated by timestamps option
-
-### Additional Implementation:
-
-#### **7. Schema Validation**
-
-- [ ] Validate that items array is not empty
-- [ ] Validate item prices and quantities are positive
-- [ ] Add custom validation for delivery address format
-
-#### **8. Pre-save Middleware**
-
-- [ ] Auto-calculate totalAmount from items if not provided
-- [ ] Validate price integrity against current pizza prices
-- [ ] Add status transition validation
-
-#### **9. Instance Methods**
-
-- [ ] `canBeModified()` - check if order can be modified based on status
-- [ ] `calculateEstimatedDelivery()` - calculate delivery time based on items
-
-#### **10. Static Methods**
-
-- [ ] `findByUserPaginated()` - find orders by user with pagination
-- [ ] `getOrderStats()` - get order statistics for admin dashboard
-
-#### **11. Database Indexes**
-
-- [ ] `user + createdAt` for user order history queries
-- [ ] `status + createdAt` for status-based admin queries
-- [ ] `createdAt` for recent orders
-
-### Test Your Backend:
+**No backend changes needed!** These endpoints are ready:
 
 ```bash
-# Test the comprehensive Order model test suite
-cd backend
-npm test order.model.test.js
+# Get all orders for admin dashboard
+GET /api/admin/orders
+Authorization: Bearer <admin-token>
+
+# Update order status  
+PATCH /api/admin/orders/:orderId/status
+Authorization: Bearer <admin-token>
+Content-Type: application/json
+
+# Body example:
+{ "status": "confirmed" }
+
+# Valid statuses: pending, confirmed, preparing, out_for_delivery, delivered, cancelled
+
+# Quick confirm order
+PATCH /api/admin/orders/:orderId/confirm
+Authorization: Bearer <admin-token>
 ```
+
+## 🎨 Angular Frontend Implementation
+
+**File**: `frontend-angular/src/app/pages/admin-dashboard/admin-dashboard.component.ts`
+
+### Required Angular Features:
+
+**Real-Time Polling:**
+- [ ] Use RxJS `interval()` to poll orders every 3-5 seconds
+- [ ] Implement smart polling (pause when tab not visible)
+- [ ] Handle polling subscription cleanup to prevent memory leaks
+- [ ] Use `switchMap()` to prevent overlapping requests
+
+**Order Status Management:**
+- [ ] Create status update functions using admin API endpoints
+- [ ] Implement optimistic UI updates for better UX
+- [ ] Handle API errors with proper rollback
+- [ ] Show loading states during status updates
+
+**Real-Time UI Features:**
+- [ ] Display orders in a responsive table/card layout
+- [ ] Show real-time status badges with color coding
+- [ ] Implement status transition buttons (confirm, update status)
+- [ ] Auto-refresh timestamps and order counts
+
+**Tab Visibility Optimization:**
+- [ ] Use `document.visibilityState` to pause polling when tab inactive
+- [ ] Resume polling when tab becomes visible again
+- [ ] Prevent unnecessary API calls for performance
 
 ## ✅ Success Criteria
 
@@ -418,40 +411,39 @@ See `backend/tests/README.md` for detailed test descriptions and evaluation crit
 
 ---
 
-# 🎯 TASK 3: Webhook Implementation
+# 🎯 **FEATURE 3: Order Complaint Form with Advanced Validation**
 
 <details>
 
 <summary><i>Open instructions</i></summary>
 
-**Time Estimate**: 20-30 minutes
+**Time Estimate**: 25 minutes
 
 ## 🎬 What You're Building
 
-You'll implement a robust webhook system that lets external delivery services update order status in real-time:
+You'll implement an advanced complaint form system that demonstrates senior Angular reactive forms expertise:
 
-- Receive webhook calls from delivery partners
-- Validate order status transitions
-- Update order records with proper error handling
-- Log status changes for debugging
+- **Location**: Add complaint functionality to `/orders` page (Order History)
+- **Advanced Validation**: Custom validators with real-time feedback
+- **Reactive Forms**: Complex form state management
+- **User Experience**: Form per order with modal/dropdown interface
 
-## 📊 Expected Webhook Payload
+## 📊 Expected Complaint Form Structure
 
-The delivery service will send payloads like this:
+The complaint form should collect this data:
 
-```json
-{
-  "orderId": "60d5f484f4b7a5b8c8f8e123",
-  "status": "confirmed",
-  "estimatedDeliveryTime": "2024-03-15T18:30:00Z",
-  "deliveryNotes": "Order confirmed by restaurant",
-  "timestamp": "2024-03-15T17:45:00Z"
+```typescript
+interface ComplaintForm {
+  complaintType: 'Quality Issue' | 'Delivery Problem' | 'Wrong Order' | 'Other';
+  description: string; // Required, min 20 characters
+  priority: 'low' | 'medium' | 'high';
+  contactPreference: ('email' | 'phone')[]; // Optional array
 }
 ```
 
-## 🔧 Backend Implementation
+## 🔧 Available Backend API
 
-**File**: `backend/src/controllers/webhookController.js`
+**No backend changes needed!** This endpoint is ready:
 
 ### Implementation Requirements:
 
