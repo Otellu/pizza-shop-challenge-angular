@@ -445,57 +445,53 @@ interface ComplaintForm {
 
 **No backend changes needed!** This endpoint is ready:
 
-### Implementation Requirements:
-
-#### **1. Payload Validation**
-
-- [ ] Validate required fields: `orderId`, `status`, `timestamp`
-- [ ] Verify orderId is valid MongoDB ObjectId
-- [ ] Return 400 for missing/invalid fields
-
-#### **2. Order Status Management**
-
-- [ ] Find order by ID (return 404 if not found)
-- [ ] Validate status transitions using allowed rules
-- [ ] Update order status and optional fields
-- [ ] Save statusUpdatedAt timestamp
-
-#### **3. Status Transition Rules**
-
-```javascript
-const allowedTransitions = {
-  pending: ["confirmed", "cancelled"],
-  confirmed: ["preparing", "cancelled"],
-  preparing: ["out_for_delivery", "cancelled"],
-  out_for_delivery: ["delivered", "cancelled"],
-  delivered: [], // Final state
-  cancelled: [], // Final state
-};
-```
-
-#### **4. Error Handling**
-
-- [ ] **400 Bad Request**: Missing required fields
-- [ ] **404 Not Found**: Order not found
-- [ ] **409 Conflict**: Invalid status transition
-- [ ] **500 Internal Server Error**: Database errors
-
-#### **5. Response Format**
-
-```json
-{
-  "message": "Order status updated successfully",
-  "orderId": "60d5f484f4b7a5b8c8f8e123",
-  "newStatus": "confirmed"
-}
-```
-
-### Test Your Backend:
-
 ```bash
-# Test webhook endpoint
-npm run feat-1:test
+# Submit complaint for specific order
+POST /api/orders/:orderId/complaint
+Authorization: Bearer <token>
+Content-Type: application/json
+
+# Body example:
+{
+  "complaintType": "Quality Issue",
+  "description": "Pizza was cold and toppings were missing",
+  "priority": "high",
+  "contactPreference": ["email", "phone"]
+}
+
+# Also available:
+GET /api/orders/mine  # Get user's order history
 ```
+
+## 🎨 Angular Frontend Implementation  
+
+**File**: `frontend-angular/src/app/pages/order-history/order-history.component.ts`
+
+### Required Angular Features:
+
+**Reactive Forms Setup:**
+- [ ] Create `FormGroup` with proper TypeScript typing
+- [ ] Implement custom validators for description length (min 20 chars)
+- [ ] Add conditional validation for complaint type selection
+- [ ] Use `FormArray` for contactPreference checkboxes
+
+**Advanced Validation:**
+- [ ] Real-time validation with error display as user types
+- [ ] Cross-field validation (priority based on complaint type)
+- [ ] Custom async validators if needed
+- [ ] Form state management (dirty, touched, valid states)
+
+**User Interface:**
+- [ ] Add "File Complaint" button/link for each order
+- [ ] Implement modal popup or expandable form per order
+- [ ] Form fields: dropdown, textarea, radio buttons, checkboxes
+- [ ] Proper form state feedback (disabled submit until valid)
+
+**Form Submission:**
+- [ ] Handle form submission with proper error handling
+- [ ] Show loading states during API calls
+- [ ] Success/error feedback with toast notifications
+- [ ] Reset form after successful submission
 
 ## ✅ Success Criteria
 
@@ -571,9 +567,9 @@ curl -X POST http://localhost:5000/api/webhook/delivery-update \
 
 ### What You Need to Complete:
 
-- [ ] **Task 1**: Complete filter/sort/pagination system
-- [ ] **Task 2**: Design comprehensive Order schema
-- [ ] **Task 3**: Implement webhook functionality
+- [ ] **Feature 1**: Smart Pizza Discovery with infinite scroll and order creation
+- [ ] **Feature 2**: Real-time Admin Dashboard with polling and status updates
+- [ ] **Feature 3**: Order Complaint Form with advanced reactive form validation
 
 ### Quality Standards:
 
