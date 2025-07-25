@@ -1,1 +1,201 @@
-<p>order-history works!</p>
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-3xl font-bold text-gray-900 mb-8">Order History</h1>
+
+  <!-- Loading State -->
+  <div *ngIf="loadingOrders" class="flex justify-center py-8">
+    <app-loader></app-loader>
+  </div>
+
+  <!-- Orders List -->
+  <div *ngIf="!loadingOrders" class="space-y-6">
+    <!-- No Orders Message -->
+    <div *ngIf="orders.length === 0" class="text-center py-12">
+      <div class="text-gray-500 text-lg">No orders found</div>
+      <p class="text-gray-400 mt-2">Your order history will appear here</p>
+    </div>
+
+    <!-- Order Cards -->
+    <div *ngFor="let order of orders" class="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+      <!-- Order Header -->
+      <div class="flex justify-between items-start mb-4">
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900">
+            Order #{{ getOrderId(order) }}
+          </h3>
+          <p class="text-sm text-gray-600">{{ formatDate(order.createdAt) }}</p>
+        </div>
+        <div class="flex items-center space-x-4">
+          <span 
+            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+            [class]="getStatusClass(order.status)">
+            {{ order.status | titlecase }}
+          </span>
+          <span class="text-lg font-bold text-gray-900">
+            ${{ order.totalAmount.toFixed(2) }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Order Items -->
+      <div class="mb-4">
+        <h4 class="text-sm font-medium text-gray-700 mb-2">Items:</h4>
+        <div class="space-y-2">
+          <div *ngFor="let item of order.items" class="flex justify-between items-center text-sm">
+            <span class="text-gray-900">{{ item.pizza.name }} ({{ item.size }})</span>
+            <span class="text-gray-600">{{ item.quantity }}x ${{ item.price.toFixed(2) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Delivery Address -->
+      <div *ngIf="order.customerInfo.address" class="mb-4">
+        <h4 class="text-sm font-medium text-gray-700 mb-1">Delivery Address:</h4>
+        <p class="text-sm text-gray-600">{{ order.customerInfo.address }}</p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+        <button 
+          type="button"
+          class="px-4 py-2 text-sm font-medium text-orange-600 bg-orange-50 border border-orange-200 rounded-md hover:bg-orange-100 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors"
+          (click)="openComplaintForm(order.id)">
+          File Complaint
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Complaint Modal -->
+  <div *ngIf="showComplaintForm" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+      <div class="mt-3">
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between pb-4 border-b">
+          <h3 class="text-lg font-medium text-gray-900">File a Complaint</h3>
+          <button 
+            type="button"
+            class="text-gray-400 hover:text-gray-600"
+            (click)="closeComplaintForm()">
+            <span class="sr-only">Close</span>
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Complaint Form -->
+        <form [formGroup]="complaintForm" (ngSubmit)="submitComplaint()" class="mt-6 space-y-6">
+          
+          <!-- Complaint Type -->
+          <div>
+            <label for="complaintType" class="block text-sm font-medium text-gray-700 mb-2">
+              Complaint Type *
+            </label>
+            <select 
+              id="complaintType"
+              formControlName="complaintType"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+              <option value="" disabled>Select complaint type</option>
+              <option *ngFor="let type of getComplaintTypes()" [value]="type.value">
+                {{ type.label }}
+              </option>
+            </select>
+            <!-- Basic validation - candidate will enhance -->
+            <div *ngIf="complaintForm.get('complaintType')?.invalid && complaintForm.get('complaintType')?.touched" 
+                 class="mt-1 text-sm text-red-600">
+              Complaint type is required
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div>
+            <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+              Description * 
+              <!-- 🚀 TODO: Add character count display and minimum length indicator -->
+            </label>
+            <textarea 
+              id="description"
+              formControlName="description"
+              rows="4"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              placeholder="Please describe your complaint in detail..."></textarea>
+            
+            <!-- ========================================== -->
+            <!-- 🚀 TODO: ENHANCE VALIDATION FEEDBACK -->
+            <!-- ========================================== -->
+            <!-- Replace basic validation with:
+                 1. Real-time character count
+                 2. Custom minLength validator error messages
+                 3. Show validation as user types (not just on touch)
+                 4. Visual feedback for validation states
+            -->
+            <div *ngIf="complaintForm.get('description')?.invalid && complaintForm.get('description')?.touched" 
+                 class="mt-1 text-sm text-red-600">
+              <span *ngIf="complaintForm.get('description')?.errors?.['required']">Description is required</span>
+              <!-- TODO: Add custom minLength error display -->
+            </div>
+          </div>
+
+          <!-- Priority -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Priority *</label>
+            <div class="space-y-2">
+              <div *ngFor="let priority of getPriorityOptions()" class="flex items-center">
+                <input 
+                  [id]="'priority-' + priority.value"
+                  type="radio" 
+                  [value]="priority.value"
+                  formControlName="priority"
+                  class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300">
+                <label [for]="'priority-' + priority.value" class="ml-2 text-sm text-gray-700">
+                  {{ priority.label }}
+                </label>
+              </div>
+            </div>
+            <div *ngIf="complaintForm.get('priority')?.invalid && complaintForm.get('priority')?.touched" 
+                 class="mt-1 text-sm text-red-600">
+              Priority is required
+            </div>
+          </div>
+
+          <!-- Contact Preference -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Preferred Contact Method (Optional)</label>
+            <div class="space-y-2">
+              <div *ngFor="let contact of getContactOptions(); let i = index" class="flex items-center">
+                <input 
+                  [id]="'contact-' + contact.value"
+                  type="checkbox" 
+                  [value]="contact.value"
+                  class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded">
+                <label [for]="'contact-' + contact.value" class="ml-2 text-sm text-gray-700">
+                  {{ contact.label }}
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+            <button 
+              type="button"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+              (click)="closeComplaintForm()">
+              Cancel
+            </button>
+            <button 
+              type="submit"
+              [disabled]="complaintForm.invalid || submittingComplaint"
+              class="px-4 py-2 text-sm font-medium text-white bg-orange-600 border border-transparent rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
+              <span *ngIf="!submittingComplaint">Submit Complaint</span>
+              <span *ngIf="submittingComplaint" class="flex items-center">
+    
+                Submitting...
+              </span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,4 +1,5 @@
-const axios = require('axios');
+const Order = require("../models/Order");
+const axios = require("axios");
 
 /**
  * Simulates a delivery update with a random delay between 5-10 seconds
@@ -11,10 +12,9 @@ const simulateDeliveryUpdate = async () => {
   // create a random order id
   const order = Order.create({
     orderId: Math.random().toString(36).substring(2, 15),
-    status: 'pending',
-    timestamp: new Date().toISOString()
+    status: "pending",
+    timestamp: new Date().toISOString(),
   });
-
 
   console.log(`Scheduling delivery update for order ${order._id} in ${delay / 1000} seconds...`);
 
@@ -22,16 +22,16 @@ const simulateDeliveryUpdate = async () => {
     setTimeout(async () => {
       try {
         const payload = {
-          event: 'delivery.status_update',
+          event: "delivery.status_update",
           data: {
             orderId: order._id,
-            status: 'delivered',
-            timestamp: new Date().toISOString()
-          }
+            status: "delivered",
+            timestamp: new Date().toISOString(),
+          },
         };
 
         // Make the webhook call
-        const port = process.env.PORT || 5000
+        const port = process.env.PORT || 5000;
         axios.post(`http://localhost:${port}/api/webhook/delivery-update`, payload);
 
         console.log(`Delivery update sent for order ${order._id}. Status: delivered.`);
@@ -45,5 +45,5 @@ const simulateDeliveryUpdate = async () => {
 };
 
 module.exports = {
-  simulateDeliveryUpdate
+  simulateDeliveryUpdate,
 };

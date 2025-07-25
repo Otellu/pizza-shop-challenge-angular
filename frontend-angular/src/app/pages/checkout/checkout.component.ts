@@ -11,7 +11,7 @@ import { ToastService } from '../../services/toast.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './checkout.component.html',
-  styleUrl: './checkout.component.css'
+  styleUrl: './checkout.component.css',
 })
 export class CheckoutComponent {
   private cartService = inject(CartService);
@@ -28,11 +28,13 @@ export class CheckoutComponent {
   }
 
   get totalAmount() {
-    return this.cartService.items().reduce((total, pizza) => total + pizza.price, 0);
+    return this.cartService
+      .items()
+      .reduce((total, pizza) => total + pizza.price, 0);
   }
 
   async handlePlaceOrder() {
-    if (!this.name || !this.address) {
+    if (!this.address) {
       this.toastService.error('Please fill in all fields');
       return;
     }
@@ -47,21 +49,23 @@ export class CheckoutComponent {
       console.log('Cart items:', this.cartService.items());
       const orderData = {
         items: this.cartService.items(),
-        customerInfo: {
-          name: this.name,
-          address: this.address
-        }
+        deliveryAddress: this.address,
+        totalAmount: this.totalAmount,
       };
       console.log('Order data:', orderData);
 
-      const response = await this.apiService.createOrder(orderData).toPromise() as any;
-      
+      const response = (await this.apiService
+        .createOrder(orderData)
+        .toPromise()) as any;
+
       this.cartService.clearCart();
       this.toastService.success('Order placed successfully!');
       this.router.navigate(['/orders']);
     } catch (error: any) {
       console.error('Order placement error:', error);
-      this.toastService.error(error.error?.message || error.message || 'Failed to place order');
+      this.toastService.error(
+        error.error?.message || error.message || 'Failed to place order'
+      );
     } finally {
       this.placing = false;
     }

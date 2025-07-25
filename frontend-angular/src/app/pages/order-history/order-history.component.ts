@@ -1,10 +1,10 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray, AbstractControl } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-import { ApiService, Order } from '../../services/api.service';
+import { ApiService, Order, OrderItem } from '../../services/api.service';
 import { ToastService } from '../../services/toast.service';
 import { LoaderComponent } from '../../shared/loader/loader.component';
 
@@ -83,24 +83,17 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
   complaintForm: FormGroup;
 
   constructor() {
-    // TODO: Initialize the complaint form with proper validation
-    // this.complaintForm = this.formBuilder.group({
-    //   complaintType: ['', Validators.required],
-    //   description: ['', [Validators.required, this.minLengthValidator(20)]],
-    //   priority: ['', Validators.required],
-    //   contactPreference: this.formBuilder.array([])
-    // });
-    
-    // Temporary form setup - replace with proper implementation
-    this.complaintForm = this.formBuilder.group({});
+    // Initialize basic form structure (candidates will add custom validation)
+    this.complaintForm = this.formBuilder.group({
+      complaintType: ['', Validators.required],
+      description: ['', Validators.required], // TODO: Add custom minLength validator
+      priority: ['', Validators.required],
+      contactPreference: this.formBuilder.array([])
+    });
   }
 
   ngOnInit() {
-    // ========================================
-    // 🚀 TODO: LOAD USER ORDERS
-    // ========================================
-    // Call this.loadUserOrders() to fetch the user's order history
-    // Handle loading states and errors properly
+    this.loadUserOrders();
   }
 
   ngOnDestroy() {
@@ -113,20 +106,19 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
   // ========================================
   
   private loadUserOrders() {
-    // TODO: Implement order loading
-    // this.loadingOrders = true;
-    // this.apiService.getUserOrders()
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe({
-    //     next: (orders) => {
-    //       this.orders = orders;
-    //       this.loadingOrders = false;
-    //     },
-    //     error: (error) => {
-    //       this.toastService.error('Failed to load order history');
-    //       this.loadingOrders = false;
-    //     }
-    //   });
+    this.loadingOrders = true;
+    this.apiService.getUserOrders()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (orders) => {
+          this.orders = orders;
+          this.loadingOrders = false;
+        },
+        error: (error) => {
+          this.toastService.error('Failed to load order history');
+          this.loadingOrders = false;
+        }
+      });
   }
 
   // ========================================
@@ -134,17 +126,15 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
   // ========================================
 
   openComplaintForm(orderId: string) {
-    // TODO: Set up complaint form for specific order
-    // this.selectedOrderId = orderId;
-    // this.showComplaintForm = true;
-    // this.resetComplaintForm();
+    this.selectedOrderId = orderId;
+    this.showComplaintForm = true;
+    this.resetComplaintForm();
   }
 
   closeComplaintForm() {
-    // TODO: Close and reset the complaint form
-    // this.showComplaintForm = false;
-    // this.selectedOrderId = null;
-    // this.resetComplaintForm();
+    this.showComplaintForm = false;
+    this.selectedOrderId = null;
+    this.resetComplaintForm();
   }
 
   submitComplaint() {
@@ -170,9 +160,10 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
   }
 
   private resetComplaintForm() {
-    // TODO: Reset form to initial state
-    // this.complaintForm.reset();
-    // Clear validation errors
+    this.complaintForm.reset();
+    // Clear contact preference checkboxes
+    const contactArray = this.complaintForm.get('contactPreference') as FormArray;
+    contactArray.clear();
   }
 
   // ========================================
@@ -220,7 +211,7 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
 
   // Helper methods for template
   getOrderId(order: Order): string {
-    return ((order as any)._id || order.id)?.slice(-6) || 'N/A';
+    return order.id?.slice(-6) || 'N/A';
   }
 
   formatDate(dateString: string): string {

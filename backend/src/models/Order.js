@@ -25,36 +25,44 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-
-    // TODO: Add items field - Array of mixed type objects containing:
-    // - id (Pizza ID)
-    // - name (Pizza name)
-    // - price (Pizza price)
-    // - quantity (Quantity ordered)
-
-    // TODO: Add status field - String enum with values:
-    // - "pending" (default)
-    // - "confirmed"
-    // - "preparing"
-    // - "out_for_delivery"
-    // - "delivered"
-    // - "cancelled"
-
-    // TODO: Add deliveryAddress field - String (required)
-
-    // TODO: Add totalAmount field - Number (required)
+    complaint: {
+      type: {
+        complaintType: {
+          type: String,
+          enum: ["Quality Issue", "Delivery Problem", "Wrong Order", "Other"],
+          required: true,
+        },
+        description: {
+          type: String,
+          required: true,
+          minlength: 20,
+        },
+        priority: {
+          type: String,
+          enum: ["low", "medium", "high"],
+          required: true,
+        },
+        contactPreference: {
+          type: [String],
+          enum: ["email", "phone"],
+          default: [],
+        },
+        status: {
+          type: String,
+          enum: ["pending", "resolved", "rejected"],
+          default: "pending",
+        },
+        submittedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+      default: null,
+    },
   },
   {
     timestamps: true, // This will auto-generate createdAt and updatedAt
   }
 );
-
-// TODO: Add validation to ensure items array is not empty
-
-// TODO: Add pre-save middleware to validate totalAmount matches sum of item prices
-
-// TODO: Add instance method to check if order can be modified
-
-// TODO: Add static method to find orders by user with pagination
 
 module.exports = mongoose.model("Order", orderSchema);

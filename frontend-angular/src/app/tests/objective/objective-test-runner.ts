@@ -36,8 +36,8 @@ export interface FeatureScore {
 
 export interface ObjectiveTestResults {
   componentScore: number; // 80 points max
-  e2eScore: number;       // 20 points max
-  totalScore: number;     // 100 points max
+  e2eScore: number; // 20 points max
+  totalScore: number; // 100 points max
   features: FeatureScore[];
   summary: {
     passed: number;
@@ -61,12 +61,11 @@ export class ObjectiveTestRunner {
     try {
       // PRIMARY EVALUATION: Component Tests (80 points)
       const componentResults = await this.runComponentTests();
-      
-      // SECONDARY EVALUATION: E2E Smoke Tests (20 points)  
+
+      // SECONDARY EVALUATION: E2E Smoke Tests (20 points)
       const e2eResults = await this.runE2ESmokeTests();
 
       return this.generateFinalResults(componentResults, e2eResults);
-
     } catch (error) {
       console.error('❌ Critical test runner failure:', error);
       return this.generateFailureResults(error);
@@ -74,20 +73,21 @@ export class ObjectiveTestRunner {
   }
 
   private async runComponentTests(): Promise<FeatureScore[]> {
-    console.log('🧪 Running Component Tests (Primary Evaluation - 80 points)...');
-    
+    console.log(
+      '🧪 Running Component Tests (Primary Evaluation - 80 points)...'
+    );
+
     const features: FeatureScore[] = [];
 
     try {
       // Feature 1: Pizza Discovery (27 points)
       features.push(await this.testFeature1PizzaDiscovery());
-      
-      // Feature 2: Admin Dashboard (27 points)  
+
+      // Feature 2: Admin Dashboard (27 points)
       features.push(await this.testFeature2AdminDashboard());
-      
+
       // Feature 3: Complaint Forms (26 points)
       features.push(await this.testFeature3ComplaintForms());
-
     } catch (error) {
       console.error('❌ Component test suite failed:', error);
       throw error;
@@ -98,7 +98,7 @@ export class ObjectiveTestRunner {
 
   private async runE2ESmokeTests(): Promise<number> {
     console.log('🌐 Running E2E Smoke Tests (Bonus - 20 points)...');
-    
+
     try {
       // Only run if build is successful and app starts
       const canRunE2E = await this.checkE2EReadiness();
@@ -109,48 +109,54 @@ export class ObjectiveTestRunner {
 
       // Run lightweight smoke tests
       let e2eScore = 0;
-      e2eScore += await this.testE2EUserFlow();        // 10 points
-      e2eScore += await this.testE2ENetworkCalls();     // 10 points
+      e2eScore += await this.testE2EUserFlow(); // 10 points
+      e2eScore += await this.testE2ENetworkCalls(); // 10 points
 
       return e2eScore;
-
     } catch (error) {
-      console.log('⚠️ E2E tests failed, proceeding with component score only:', error.message);
+      console.log(
+        '⚠️ E2E tests failed, proceeding with component score only:',
+        error.message
+      );
       return 0;
     }
   }
 
   private async testFeature1PizzaDiscovery(): Promise<FeatureScore> {
     console.log('  📱 Testing Feature 1: Pizza Discovery...');
-    
+
     const feature: FeatureScore = {
       featureName: 'Pizza Discovery',
       functional: 0,
-      api: 0, 
+      api: 0,
       errorHandling: 0,
       performance: 0,
       total: 0,
       maxTotal: 27,
-      percentage: 0
+      percentage: 0,
     };
 
     // Functional Tests (18 points)
-    feature.functional += await this.testSearchFunctionality();      // 5 points
-    feature.functional += await this.testFilterFunctionality();      // 5 points  
-    feature.functional += await this.testSortFunctionality();        // 4 points
-    feature.functional += await this.testInfiniteScrollLogic();      // 4 points
+    feature.functional += await this.testSearchFunctionality(); // 5 points
+    feature.functional += await this.testFilterFunctionality(); // 5 points
+    feature.functional += await this.testSortFunctionality(); // 4 points
+    feature.functional += await this.testInfiniteScrollLogic(); // 4 points
 
     // API Integration Tests (6 points)
-    feature.api += await this.testPizzaAPIIntegration();             // 4 points
-    feature.api += await this.testOrderCreationAPI();               // 2 points
+    feature.api += await this.testPizzaAPIIntegration(); // 4 points
+    feature.api += await this.testOrderCreationAPI(); // 2 points
 
     // Error Handling Tests (2 points)
-    feature.errorHandling += await this.testPizzaErrorHandling();    // 2 points
+    feature.errorHandling += await this.testPizzaErrorHandling(); // 2 points
 
     // Performance Tests (1 point)
-    feature.performance += await this.testPizzaPerformance();        // 1 point
+    feature.performance += await this.testPizzaPerformance(); // 1 point
 
-    feature.total = feature.functional + feature.api + feature.errorHandling + feature.performance;
+    feature.total =
+      feature.functional +
+      feature.api +
+      feature.errorHandling +
+      feature.performance;
     feature.percentage = Math.round((feature.total / feature.maxTotal) * 100);
 
     return feature;
@@ -158,34 +164,38 @@ export class ObjectiveTestRunner {
 
   private async testFeature2AdminDashboard(): Promise<FeatureScore> {
     console.log('  ⚡ Testing Feature 2: Admin Dashboard...');
-    
+
     const feature: FeatureScore = {
       featureName: 'Admin Dashboard',
       functional: 0,
       api: 0,
-      errorHandling: 0, 
+      errorHandling: 0,
       performance: 0,
       total: 0,
       maxTotal: 27,
-      percentage: 0
+      percentage: 0,
     };
 
     // Functional Tests (18 points)
-    feature.functional += await this.testPollingFunctionality();     // 6 points
-    feature.functional += await this.testStatusUpdateLogic();        // 6 points
-    feature.functional += await this.testTabVisibilityHandling();    // 6 points
+    feature.functional += await this.testPollingFunctionality(); // 6 points
+    feature.functional += await this.testStatusUpdateLogic(); // 6 points
+    feature.functional += await this.testTabVisibilityHandling(); // 6 points
 
     // API Integration Tests (6 points)
-    feature.api += await this.testAdminAPIIntegration();             // 4 points
-    feature.api += await this.testOptimisticUpdates();               // 2 points
+    feature.api += await this.testAdminAPIIntegration(); // 4 points
+    feature.api += await this.testOptimisticUpdates(); // 2 points
 
     // Error Handling Tests (2 points)
-    feature.errorHandling += await this.testAdminErrorHandling();    // 2 points
+    feature.errorHandling += await this.testAdminErrorHandling(); // 2 points
 
-    // Performance Tests (1 point)  
-    feature.performance += await this.testPollingPerformance();      // 1 point
+    // Performance Tests (1 point)
+    feature.performance += await this.testPollingPerformance(); // 1 point
 
-    feature.total = feature.functional + feature.api + feature.errorHandling + feature.performance;
+    feature.total =
+      feature.functional +
+      feature.api +
+      feature.errorHandling +
+      feature.performance;
     feature.percentage = Math.round((feature.total / feature.maxTotal) * 100);
 
     return feature;
@@ -193,34 +203,38 @@ export class ObjectiveTestRunner {
 
   private async testFeature3ComplaintForms(): Promise<FeatureScore> {
     console.log('  📝 Testing Feature 3: Complaint Forms...');
-    
+
     const feature: FeatureScore = {
       featureName: 'Complaint Forms',
       functional: 0,
       api: 0,
       errorHandling: 0,
-      performance: 0, 
+      performance: 0,
       total: 0,
       maxTotal: 26,
-      percentage: 0
+      percentage: 0,
     };
 
     // Functional Tests (18 points)
-    feature.functional += await this.testFormValidationLogic();      // 6 points
-    feature.functional += await this.testFormSubmissionFlow();       // 6 points
-    feature.functional += await this.testFormStateManagement();      // 6 points
+    feature.functional += await this.testFormValidationLogic(); // 6 points
+    feature.functional += await this.testFormSubmissionFlow(); // 6 points
+    feature.functional += await this.testFormStateManagement(); // 6 points
 
     // API Integration Tests (6 points)
-    feature.api += await this.testComplaintAPIIntegration();         // 4 points
-    feature.api += await this.testOrderHistoryAPI();                 // 2 points
+    feature.api += await this.testComplaintAPIIntegration(); // 4 points
+    feature.api += await this.testOrderHistoryAPI(); // 2 points
 
     // Error Handling Tests (1 point)
-    feature.errorHandling += await this.testFormErrorHandling();     // 1 point
+    feature.errorHandling += await this.testFormErrorHandling(); // 1 point
 
     // Performance Tests (1 point)
-    feature.performance += await this.testFormPerformance();         // 1 point
+    feature.performance += await this.testFormPerformance(); // 1 point
 
-    feature.total = feature.functional + feature.api + feature.errorHandling + feature.performance;
+    feature.total =
+      feature.functional +
+      feature.api +
+      feature.errorHandling +
+      feature.performance;
     feature.percentage = Math.round((feature.total / feature.maxTotal) * 100);
 
     return feature;
@@ -237,46 +251,96 @@ export class ObjectiveTestRunner {
     try {
       // Test 1: Search input component exists (1 point)
       let fixture, component, compiled;
-      
+
       try {
-        const PizzaListComponent = require('../../shared/pizza-list/pizza-list.component').PizzaListComponent;
+        const PizzaListComponent =
+          require('../../shared/pizza-list/pizza-list.component').PizzaListComponent;
         fixture = TestBed.createComponent(PizzaListComponent);
       } catch (importError) {
         // Fallback: Try dynamic import or skip component-specific tests
-        this.recordResult('Pizza Discovery', 'Component Import', false, 0, 5, 'Component not found or not importable');
+        this.recordResult(
+          'Pizza Discovery',
+          'Component Import',
+          false,
+          0,
+          5,
+          'Component not found or not importable'
+        );
         return 0;
       }
       const component = fixture.componentInstance;
       const compiled = fixture.nativeElement;
-      
-      if (compiled.querySelector('input[type="search"], input[placeholder*="search"], input[placeholder*="Search"]')) {
+
+      if (
+        compiled.querySelector(
+          'input[type="search"], input[placeholder*="search"], input[placeholder*="Search"]'
+        )
+      ) {
         score += 1;
         this.recordResult('Pizza Discovery', 'Search Input Exists', true, 1, 1);
       } else {
-        this.recordResult('Pizza Discovery', 'Search Input Exists', false, 0, 1, 'Search input not found');
+        this.recordResult(
+          'Pizza Discovery',
+          'Search Input Exists',
+          false,
+          0,
+          1,
+          'Search input not found'
+        );
       }
 
       // Test 2: Search state management (2 points)
-      if (component.searchQuery !== undefined || component.state?.searchQuery !== undefined) {
+      if (
+        component.searchQuery !== undefined ||
+        component.state?.searchQuery !== undefined
+      ) {
         score += 2;
-        this.recordResult('Pizza Discovery', 'Search State Management', true, 2, 2);
+        this.recordResult(
+          'Pizza Discovery',
+          'Search State Management',
+          true,
+          2,
+          2
+        );
       } else {
-        this.recordResult('Pizza Discovery', 'Search State Management', false, 0, 2, 'Search state not implemented');
+        this.recordResult(
+          'Pizza Discovery',
+          'Search State Management',
+          false,
+          0,
+          2,
+          'Search state not implemented'
+        );
       }
 
       // Test 3: Debouncing implementation (2 points)
-      const hasDebouncing = component.searchSubject || 
-                           component.searchControl || 
-                           (component.searchQuery$ && typeof component.searchQuery$.pipe === 'function');
+      const hasDebouncing =
+        component.searchSubject ||
+        component.searchControl ||
+        (component.searchQuery$ &&
+          typeof component.searchQuery$.pipe === 'function');
       if (hasDebouncing) {
         score += 2;
         this.recordResult('Pizza Discovery', 'Search Debouncing', true, 2, 2);
       } else {
-        this.recordResult('Pizza Discovery', 'Search Debouncing', false, 0, 2, 'Debouncing not implemented');
+        this.recordResult(
+          'Pizza Discovery',
+          'Search Debouncing',
+          false,
+          0,
+          2,
+          'Debouncing not implemented'
+        );
       }
-
     } catch (error) {
-      this.recordResult('Pizza Discovery', 'Search Functionality Test', false, 0, 5, error.message);
+      this.recordResult(
+        'Pizza Discovery',
+        'Search Functionality Test',
+        false,
+        0,
+        5,
+        error.message
+      );
     }
 
     return score;
@@ -287,45 +351,95 @@ export class ObjectiveTestRunner {
     const startTime = Date.now();
 
     try {
-      const fixture = TestBed.createComponent(require('../../shared/pizza-list/pizza-list.component').PizzaListComponent);
+      const fixture = TestBed.createComponent(
+        require('../../shared/pizza-list/pizza-list.component')
+          .PizzaListComponent
+      );
       const component = fixture.componentInstance;
       const compiled = fixture.nativeElement;
-      
+
       // Test 1: Filter UI elements exist (1 point)
-      const filterElements = compiled.querySelectorAll('select, button, input[type="radio"]');
-      const hasFilterUI = Array.from(filterElements).some(el => 
-        el.textContent?.includes('veg') || 
-        el.textContent?.includes('Veg') ||
-        el.getAttribute('value')?.includes('veg')
+      const filterElements = compiled.querySelectorAll(
+        'select, button, input[type="radio"]'
       );
-      
+      const hasFilterUI = Array.from(filterElements).some(
+        (el) =>
+          el.textContent?.includes('veg') ||
+          el.textContent?.includes('Veg') ||
+          el.getAttribute('value')?.includes('veg')
+      );
+
       if (hasFilterUI) {
         score += 1;
         this.recordResult('Pizza Discovery', 'Filter UI Elements', true, 1, 1);
       } else {
-        this.recordResult('Pizza Discovery', 'Filter UI Elements', false, 0, 1, 'Filter UI not found');
+        this.recordResult(
+          'Pizza Discovery',
+          'Filter UI Elements',
+          false,
+          0,
+          1,
+          'Filter UI not found'
+        );
       }
 
       // Test 2: Filter state management (2 points)
-      if (component.currentFilter !== undefined || component.state?.currentFilter !== undefined) {
+      if (
+        component.currentFilter !== undefined ||
+        component.state?.currentFilter !== undefined
+      ) {
         score += 2;
-        this.recordResult('Pizza Discovery', 'Filter State Management', true, 2, 2);
+        this.recordResult(
+          'Pizza Discovery',
+          'Filter State Management',
+          true,
+          2,
+          2
+        );
       } else {
-        this.recordResult('Pizza Discovery', 'Filter State Management', false, 0, 2, 'Filter state not implemented');
+        this.recordResult(
+          'Pizza Discovery',
+          'Filter State Management',
+          false,
+          0,
+          2,
+          'Filter state not implemented'
+        );
       }
 
       // Test 3: Filter change method exists (2 points)
-      if (typeof component.onFilterChange === 'function' || 
-          typeof component.setFilter === 'function' ||
-          typeof component.changeFilter === 'function') {
+      if (
+        typeof component.onFilterChange === 'function' ||
+        typeof component.setFilter === 'function' ||
+        typeof component.changeFilter === 'function'
+      ) {
         score += 2;
-        this.recordResult('Pizza Discovery', 'Filter Change Method', true, 2, 2);
+        this.recordResult(
+          'Pizza Discovery',
+          'Filter Change Method',
+          true,
+          2,
+          2
+        );
       } else {
-        this.recordResult('Pizza Discovery', 'Filter Change Method', false, 0, 2, 'Filter change method not found');
+        this.recordResult(
+          'Pizza Discovery',
+          'Filter Change Method',
+          false,
+          0,
+          2,
+          'Filter change method not found'
+        );
       }
-
     } catch (error) {
-      this.recordResult('Pizza Discovery', 'Filter Functionality Test', false, 0, 5, error.message);
+      this.recordResult(
+        'Pizza Discovery',
+        'Filter Functionality Test',
+        false,
+        0,
+        5,
+        error.message
+      );
     }
 
     return score;
@@ -336,43 +450,86 @@ export class ObjectiveTestRunner {
     const startTime = Date.now();
 
     try {
-      const fixture = TestBed.createComponent(require('../../shared/pizza-list/pizza-list.component').PizzaListComponent);
+      const fixture = TestBed.createComponent(
+        require('../../shared/pizza-list/pizza-list.component')
+          .PizzaListComponent
+      );
       const component = fixture.componentInstance;
       const compiled = fixture.nativeElement;
-      
+
       // Test 1: Sort UI elements exist (1 point)
       const sortElements = compiled.querySelectorAll('select, button');
-      const hasSortUI = Array.from(sortElements).some(el => 
-        el.textContent?.toLowerCase().includes('sort') || 
-        el.textContent?.toLowerCase().includes('price') ||
-        el.textContent?.toLowerCase().includes('name')
+      const hasSortUI = Array.from(sortElements).some(
+        (el) =>
+          el.textContent?.toLowerCase().includes('sort') ||
+          el.textContent?.toLowerCase().includes('price') ||
+          el.textContent?.toLowerCase().includes('name')
       );
-      
+
       if (hasSortUI) {
         score += 1;
         this.recordResult('Pizza Discovery', 'Sort UI Elements', true, 1, 1);
       } else {
-        this.recordResult('Pizza Discovery', 'Sort UI Elements', false, 0, 1, 'Sort UI not found');
+        this.recordResult(
+          'Pizza Discovery',
+          'Sort UI Elements',
+          false,
+          0,
+          1,
+          'Sort UI not found'
+        );
       }
 
       // Test 2: Sort state management (2 points)
-      if (component.currentSort !== undefined || component.state?.currentSort !== undefined) {
+      if (
+        component.currentSort !== undefined ||
+        component.state?.currentSort !== undefined
+      ) {
         score += 2;
-        this.recordResult('Pizza Discovery', 'Sort State Management', true, 2, 2);
+        this.recordResult(
+          'Pizza Discovery',
+          'Sort State Management',
+          true,
+          2,
+          2
+        );
       } else {
-        this.recordResult('Pizza Discovery', 'Sort State Management', false, 0, 2, 'Sort state not implemented');
+        this.recordResult(
+          'Pizza Discovery',
+          'Sort State Management',
+          false,
+          0,
+          2,
+          'Sort state not implemented'
+        );
       }
 
       // Test 3: Sort helper methods exist (1 point)
-      if (typeof component.getSortField === 'function' && typeof component.getSortOrder === 'function') {
+      if (
+        typeof component.getSortField === 'function' &&
+        typeof component.getSortOrder === 'function'
+      ) {
         score += 1;
         this.recordResult('Pizza Discovery', 'Sort Helper Methods', true, 1, 1);
       } else {
-        this.recordResult('Pizza Discovery', 'Sort Helper Methods', false, 0, 1, 'Sort helper methods not found');
+        this.recordResult(
+          'Pizza Discovery',
+          'Sort Helper Methods',
+          false,
+          0,
+          1,
+          'Sort helper methods not found'
+        );
       }
-
     } catch (error) {
-      this.recordResult('Pizza Discovery', 'Sort Functionality Test', false, 0, 4, error.message);
+      this.recordResult(
+        'Pizza Discovery',
+        'Sort Functionality Test',
+        false,
+        0,
+        4,
+        error.message
+      );
     }
 
     return score;
@@ -383,43 +540,81 @@ export class ObjectiveTestRunner {
     const startTime = Date.now();
 
     try {
-      const fixture = TestBed.createComponent(require('../../shared/pizza-list/pizza-list.component').PizzaListComponent);
+      const fixture = TestBed.createComponent(
+        require('../../shared/pizza-list/pizza-list.component')
+          .PizzaListComponent
+      );
       const component = fixture.componentInstance;
       const compiled = fixture.nativeElement;
-      
+
       // Test 1: Pagination state exists (1 point)
-      if (component.currentPage !== undefined || 
-          component.state?.currentPage !== undefined ||
-          component.hasMore !== undefined ||
-          component.state?.hasMore !== undefined) {
+      if (
+        component.currentPage !== undefined ||
+        component.state?.currentPage !== undefined ||
+        component.hasMore !== undefined ||
+        component.state?.hasMore !== undefined
+      ) {
         score += 1;
         this.recordResult('Pizza Discovery', 'Pagination State', true, 1, 1);
       } else {
-        this.recordResult('Pizza Discovery', 'Pagination State', false, 0, 1, 'Pagination state not found');
+        this.recordResult(
+          'Pizza Discovery',
+          'Pagination State',
+          false,
+          0,
+          1,
+          'Pagination state not found'
+        );
       }
 
       // Test 2: Load more method exists (2 points)
-      if (typeof component.loadMorePizzas === 'function' ||
-          typeof component.loadMore === 'function' ||
-          typeof component.onScroll === 'function') {
+      if (
+        typeof component.loadMorePizzas === 'function' ||
+        typeof component.loadMore === 'function' ||
+        typeof component.onScroll === 'function'
+      ) {
         score += 2;
         this.recordResult('Pizza Discovery', 'Load More Method', true, 2, 2);
       } else {
-        this.recordResult('Pizza Discovery', 'Load More Method', false, 0, 2, 'Load more method not found');
+        this.recordResult(
+          'Pizza Discovery',
+          'Load More Method',
+          false,
+          0,
+          2,
+          'Load more method not found'
+        );
       }
 
       // Test 3: Intersection Observer or scroll detection (1 point)
-      if (component.observer || 
-          component.intersectionObserver ||
-          compiled.querySelector('[data-testid="scroll-trigger"], .scroll-trigger')) {
+      if (
+        component.observer ||
+        component.intersectionObserver ||
+        compiled.querySelector(
+          '[data-testid="scroll-trigger"], .scroll-trigger'
+        )
+      ) {
         score += 1;
         this.recordResult('Pizza Discovery', 'Scroll Detection', true, 1, 1);
       } else {
-        this.recordResult('Pizza Discovery', 'Scroll Detection', false, 0, 1, 'Scroll detection not implemented');
+        this.recordResult(
+          'Pizza Discovery',
+          'Scroll Detection',
+          false,
+          0,
+          1,
+          'Scroll detection not implemented'
+        );
       }
-
     } catch (error) {
-      this.recordResult('Pizza Discovery', 'Infinite Scroll Test', false, 0, 4, error.message);
+      this.recordResult(
+        'Pizza Discovery',
+        'Infinite Scroll Test',
+        false,
+        0,
+        4,
+        error.message
+      );
     }
 
     return score;
@@ -430,41 +625,83 @@ export class ObjectiveTestRunner {
     const startTime = Date.now();
 
     try {
-      const mockApiService = jasmine.createSpyObj('ApiService', ['getAllPizzasWithQuery']);
-      const fixture = TestBed.createComponent(require('../../shared/pizza-list/pizza-list.component').PizzaListComponent);
+      const mockApiService = jasmine.createSpyObj('ApiService', [
+        'getAllPizzasWithQuery',
+      ]);
+      const fixture = TestBed.createComponent(
+        require('../../shared/pizza-list/pizza-list.component')
+          .PizzaListComponent
+      );
       const component = fixture.componentInstance;
-      
+
       // Test 1: API service injection (1 point)
       if (component.apiService || component.api) {
         score += 1;
-        this.recordResult('Pizza Discovery', 'API Service Injection', true, 1, 1);
+        this.recordResult(
+          'Pizza Discovery',
+          'API Service Injection',
+          true,
+          1,
+          1
+        );
       } else {
-        this.recordResult('Pizza Discovery', 'API Service Injection', false, 0, 1, 'API service not injected');
+        this.recordResult(
+          'Pizza Discovery',
+          'API Service Injection',
+          false,
+          0,
+          1,
+          'API service not injected'
+        );
       }
 
       // Test 2: Load pizzas method exists (2 points)
-      if (typeof component.loadPizzas === 'function' ||
-          typeof component.fetchPizzas === 'function' ||
-          typeof component.getPizzas === 'function') {
+      if (
+        typeof component.loadPizzas === 'function' ||
+        typeof component.fetchPizzas === 'function' ||
+        typeof component.getPizzas === 'function'
+      ) {
         score += 2;
         this.recordResult('Pizza Discovery', 'Load Pizzas Method', true, 2, 2);
       } else {
-        this.recordResult('Pizza Discovery', 'Load Pizzas Method', false, 0, 2, 'Load pizzas method not found');
+        this.recordResult(
+          'Pizza Discovery',
+          'Load Pizzas Method',
+          false,
+          0,
+          2,
+          'Load pizzas method not found'
+        );
       }
 
       // Test 3: Query parameter construction (1 point)
-      if (typeof component.buildQueryParams === 'function' ||
-          typeof component.getQueryParams === 'function' ||
-          component.loadPizzas?.toString().includes('filter') ||
-          component.loadPizzas?.toString().includes('sort')) {
+      if (
+        typeof component.buildQueryParams === 'function' ||
+        typeof component.getQueryParams === 'function' ||
+        component.loadPizzas?.toString().includes('filter') ||
+        component.loadPizzas?.toString().includes('sort')
+      ) {
         score += 1;
         this.recordResult('Pizza Discovery', 'Query Parameters', true, 1, 1);
       } else {
-        this.recordResult('Pizza Discovery', 'Query Parameters', false, 0, 1, 'Query parameter construction not found');
+        this.recordResult(
+          'Pizza Discovery',
+          'Query Parameters',
+          false,
+          0,
+          1,
+          'Query parameter construction not found'
+        );
       }
-
     } catch (error) {
-      this.recordResult('Pizza Discovery', 'API Integration Test', false, 0, 4, error.message);
+      this.recordResult(
+        'Pizza Discovery',
+        'API Integration Test',
+        false,
+        0,
+        4,
+        error.message
+      );
     }
 
     return score;
@@ -475,28 +712,59 @@ export class ObjectiveTestRunner {
     const startTime = Date.now();
 
     try {
-      const fixture = TestBed.createComponent(require('../../shared/pizza-list/pizza-list.component').PizzaListComponent);
+      const fixture = TestBed.createComponent(
+        require('../../shared/pizza-list/pizza-list.component')
+          .PizzaListComponent
+      );
       const component = fixture.componentInstance;
-      
+
       // Test 1: Add to cart method exists (1 point)
-      if (typeof component.addToCart === 'function' ||
-          typeof component.addPizzaToCart === 'function') {
+      if (
+        typeof component.addToCart === 'function' ||
+        typeof component.addPizzaToCart === 'function'
+      ) {
         score += 1;
         this.recordResult('Pizza Discovery', 'Add to Cart Method', true, 1, 1);
       } else {
-        this.recordResult('Pizza Discovery', 'Add to Cart Method', false, 0, 1, 'Add to cart method not found');
+        this.recordResult(
+          'Pizza Discovery',
+          'Add to Cart Method',
+          false,
+          0,
+          1,
+          'Add to cart method not found'
+        );
       }
 
       // Test 2: Cart service integration (1 point)
       if (component.cartService || component.cart) {
         score += 1;
-        this.recordResult('Pizza Discovery', 'Cart Service Integration', true, 1, 1);
+        this.recordResult(
+          'Pizza Discovery',
+          'Cart Service Integration',
+          true,
+          1,
+          1
+        );
       } else {
-        this.recordResult('Pizza Discovery', 'Cart Service Integration', false, 0, 1, 'Cart service not integrated');
+        this.recordResult(
+          'Pizza Discovery',
+          'Cart Service Integration',
+          false,
+          0,
+          1,
+          'Cart service not integrated'
+        );
       }
-
     } catch (error) {
-      this.recordResult('Pizza Discovery', 'Order Creation Test', false, 0, 2, error.message);
+      this.recordResult(
+        'Pizza Discovery',
+        'Order Creation Test',
+        false,
+        0,
+        2,
+        error.message
+      );
     }
 
     return score;
@@ -507,35 +775,67 @@ export class ObjectiveTestRunner {
     const startTime = Date.now();
 
     try {
-      const fixture = TestBed.createComponent(require('../../shared/pizza-list/pizza-list.component').PizzaListComponent);
+      const fixture = TestBed.createComponent(
+        require('../../shared/pizza-list/pizza-list.component')
+          .PizzaListComponent
+      );
       const component = fixture.componentInstance;
       const compiled = fixture.nativeElement;
-      
+
       // Test 1: Error state management (1 point)
-      if (component.error !== undefined || 
-          component.state?.error !== undefined ||
-          component.errorMessage !== undefined) {
+      if (
+        component.error !== undefined ||
+        component.state?.error !== undefined ||
+        component.errorMessage !== undefined
+      ) {
         score += 1;
-        this.recordResult('Pizza Discovery', 'Error State Management', true, 1, 1);
+        this.recordResult(
+          'Pizza Discovery',
+          'Error State Management',
+          true,
+          1,
+          1
+        );
       } else {
-        this.recordResult('Pizza Discovery', 'Error State Management', false, 0, 1, 'Error state not implemented');
+        this.recordResult(
+          'Pizza Discovery',
+          'Error State Management',
+          false,
+          0,
+          1,
+          'Error state not implemented'
+        );
       }
 
       // Test 2: Error UI handling (1 point)
-      const hasErrorUI = compiled.querySelector('.error, .alert, [data-testid="error"]') ||
-                        compiled.textContent?.includes('error') ||
-                        compiled.textContent?.includes('Error') ||
-                        compiled.querySelector('app-error-boundary');
-      
+      const hasErrorUI =
+        compiled.querySelector('.error, .alert, [data-testid="error"]') ||
+        compiled.textContent?.includes('error') ||
+        compiled.textContent?.includes('Error') ||
+        compiled.querySelector('app-error-boundary');
+
       if (hasErrorUI) {
         score += 1;
         this.recordResult('Pizza Discovery', 'Error UI Display', true, 1, 1);
       } else {
-        this.recordResult('Pizza Discovery', 'Error UI Display', false, 0, 1, 'Error UI not found');
+        this.recordResult(
+          'Pizza Discovery',
+          'Error UI Display',
+          false,
+          0,
+          1,
+          'Error UI not found'
+        );
       }
-
     } catch (error) {
-      this.recordResult('Pizza Discovery', 'Error Handling Test', false, 0, 2, error.message);
+      this.recordResult(
+        'Pizza Discovery',
+        'Error Handling Test',
+        false,
+        0,
+        2,
+        error.message
+      );
     }
 
     return score;
@@ -546,22 +846,40 @@ export class ObjectiveTestRunner {
     const startTime = Date.now();
 
     try {
-      const fixture = TestBed.createComponent(require('../../shared/pizza-list/pizza-list.component').PizzaListComponent);
+      const fixture = TestBed.createComponent(
+        require('../../shared/pizza-list/pizza-list.component')
+          .PizzaListComponent
+      );
       const component = fixture.componentInstance;
-      
+
       // Test 1: OnDestroy implementation (1 point)
-      if (typeof component.ngOnDestroy === 'function' ||
-          component.destroy$ ||
-          component.subscription ||
-          component.unsubscribe$) {
+      if (
+        typeof component.ngOnDestroy === 'function' ||
+        component.destroy$ ||
+        component.subscription ||
+        component.unsubscribe$
+      ) {
         score += 1;
         this.recordResult('Pizza Discovery', 'Memory Cleanup', true, 1, 1);
       } else {
-        this.recordResult('Pizza Discovery', 'Memory Cleanup', false, 0, 1, 'Memory cleanup not implemented');
+        this.recordResult(
+          'Pizza Discovery',
+          'Memory Cleanup',
+          false,
+          0,
+          1,
+          'Memory cleanup not implemented'
+        );
       }
-
     } catch (error) {
-      this.recordResult('Pizza Discovery', 'Performance Test', false, 0, 1, error.message);
+      this.recordResult(
+        'Pizza Discovery',
+        'Performance Test',
+        false,
+        0,
+        1,
+        error.message
+      );
     }
 
     return score;
@@ -576,41 +894,97 @@ export class ObjectiveTestRunner {
     const startTime = Date.now();
 
     try {
-      const fixture = TestBed.createComponent(require('../../pages/admin-dashboard/admin-dashboard.component').AdminDashboardComponent);
+      const fixture = TestBed.createComponent(
+        require('../../pages/admin-dashboard/admin-dashboard.component')
+          .AdminDashboardComponent
+      );
       const component = fixture.componentInstance;
-      
+
       // Test 1: Polling state management (2 points)
-      if (component.isPolling !== undefined || 
-          component.state?.isPolling !== undefined ||
-          component.pollingInterval !== undefined) {
+      if (
+        component.isPolling !== undefined ||
+        component.state?.isPolling !== undefined ||
+        component.pollingInterval !== undefined
+      ) {
         score += 2;
-        this.recordResult('Admin Dashboard', 'Polling State Management', true, 2, 2);
+        this.recordResult(
+          'Admin Dashboard',
+          'Polling State Management',
+          true,
+          2,
+          2
+        );
       } else {
-        this.recordResult('Admin Dashboard', 'Polling State Management', false, 0, 2, 'Polling state not implemented');
+        this.recordResult(
+          'Admin Dashboard',
+          'Polling State Management',
+          false,
+          0,
+          2,
+          'Polling state not implemented'
+        );
       }
 
       // Test 2: Start/stop polling methods (2 points)
-      if ((typeof component.startPolling === 'function' && typeof component.stopPolling === 'function') ||
-          (typeof component.startRealTimeUpdates === 'function' && typeof component.stopRealTimeUpdates === 'function')) {
+      if (
+        (typeof component.startPolling === 'function' &&
+          typeof component.stopPolling === 'function') ||
+        (typeof component.startRealTimeUpdates === 'function' &&
+          typeof component.stopRealTimeUpdates === 'function')
+      ) {
         score += 2;
-        this.recordResult('Admin Dashboard', 'Polling Control Methods', true, 2, 2);
+        this.recordResult(
+          'Admin Dashboard',
+          'Polling Control Methods',
+          true,
+          2,
+          2
+        );
       } else {
-        this.recordResult('Admin Dashboard', 'Polling Control Methods', false, 0, 2, 'Polling control methods not found');
+        this.recordResult(
+          'Admin Dashboard',
+          'Polling Control Methods',
+          false,
+          0,
+          2,
+          'Polling control methods not found'
+        );
       }
 
       // Test 3: RxJS interval usage (2 points)
-      if (component.pollingSubscription ||
-          component.interval$ ||
-          component.startPolling?.toString().includes('interval') ||
-          component.startRealTimeUpdates?.toString().includes('interval')) {
+      if (
+        component.pollingSubscription ||
+        component.interval$ ||
+        component.startPolling?.toString().includes('interval') ||
+        component.startRealTimeUpdates?.toString().includes('interval')
+      ) {
         score += 2;
-        this.recordResult('Admin Dashboard', 'RxJS Interval Implementation', true, 2, 2);
+        this.recordResult(
+          'Admin Dashboard',
+          'RxJS Interval Implementation',
+          true,
+          2,
+          2
+        );
       } else {
-        this.recordResult('Admin Dashboard', 'RxJS Interval Implementation', false, 0, 2, 'RxJS interval not implemented');
+        this.recordResult(
+          'Admin Dashboard',
+          'RxJS Interval Implementation',
+          false,
+          0,
+          2,
+          'RxJS interval not implemented'
+        );
       }
-
     } catch (error) {
-      this.recordResult('Admin Dashboard', 'Polling Functionality Test', false, 0, 6, error.message);
+      this.recordResult(
+        'Admin Dashboard',
+        'Polling Functionality Test',
+        false,
+        0,
+        6,
+        error.message
+      );
     }
 
     return score;
@@ -621,46 +995,90 @@ export class ObjectiveTestRunner {
     const startTime = Date.now();
 
     try {
-      const fixture = TestBed.createComponent(require('../../pages/admin-dashboard/admin-dashboard.component').AdminDashboardComponent);
+      const fixture = TestBed.createComponent(
+        require('../../pages/admin-dashboard/admin-dashboard.component')
+          .AdminDashboardComponent
+      );
       const component = fixture.componentInstance;
       const compiled = fixture.nativeElement;
-      
+
       // Test 1: Update order status method (2 points)
-      if (typeof component.updateOrderStatus === 'function' ||
-          typeof component.changeOrderStatus === 'function') {
+      if (
+        typeof component.updateOrderStatus === 'function' ||
+        typeof component.changeOrderStatus === 'function'
+      ) {
         score += 2;
-        this.recordResult('Admin Dashboard', 'Update Status Method', true, 2, 2);
+        this.recordResult(
+          'Admin Dashboard',
+          'Update Status Method',
+          true,
+          2,
+          2
+        );
       } else {
-        this.recordResult('Admin Dashboard', 'Update Status Method', false, 0, 2, 'Update status method not found');
+        this.recordResult(
+          'Admin Dashboard',
+          'Update Status Method',
+          false,
+          0,
+          2,
+          'Update status method not found'
+        );
       }
 
       // Test 2: Status dropdown/buttons UI (2 points)
-      const hasStatusUI = compiled.querySelector('select, .status-button, [data-testid="status"]') ||
-                         Array.from(compiled.querySelectorAll('button')).some(btn => 
-                           btn.textContent?.toLowerCase().includes('status') ||
-                           btn.textContent?.toLowerCase().includes('confirm') ||
-                           btn.textContent?.toLowerCase().includes('deliver')
-                         );
-      
+      const hasStatusUI =
+        compiled.querySelector(
+          'select, .status-button, [data-testid="status"]'
+        ) ||
+        Array.from(compiled.querySelectorAll('button')).some(
+          (btn) =>
+            btn.textContent?.toLowerCase().includes('status') ||
+            btn.textContent?.toLowerCase().includes('confirm') ||
+            btn.textContent?.toLowerCase().includes('deliver')
+        );
+
       if (hasStatusUI) {
         score += 2;
         this.recordResult('Admin Dashboard', 'Status Update UI', true, 2, 2);
       } else {
-        this.recordResult('Admin Dashboard', 'Status Update UI', false, 0, 2, 'Status update UI not found');
+        this.recordResult(
+          'Admin Dashboard',
+          'Status Update UI',
+          false,
+          0,
+          2,
+          'Status update UI not found'
+        );
       }
 
       // Test 3: Optimistic updates (2 points)
-      if (component.updateOrderStatus?.toString().includes('optimistic') ||
-          component.orders?.some || 
-          typeof component.updateLocalOrder === 'function') {
+      if (
+        component.updateOrderStatus?.toString().includes('optimistic') ||
+        component.orders?.some ||
+        typeof component.updateLocalOrder === 'function'
+      ) {
         score += 2;
         this.recordResult('Admin Dashboard', 'Optimistic Updates', true, 2, 2);
       } else {
-        this.recordResult('Admin Dashboard', 'Optimistic Updates', false, 0, 2, 'Optimistic updates not implemented');
+        this.recordResult(
+          'Admin Dashboard',
+          'Optimistic Updates',
+          false,
+          0,
+          2,
+          'Optimistic updates not implemented'
+        );
       }
-
     } catch (error) {
-      this.recordResult('Admin Dashboard', 'Status Update Test', false, 0, 6, error.message);
+      this.recordResult(
+        'Admin Dashboard',
+        'Status Update Test',
+        false,
+        0,
+        6,
+        error.message
+      );
     }
 
     return score;
@@ -671,41 +1089,95 @@ export class ObjectiveTestRunner {
     const startTime = Date.now();
 
     try {
-      const fixture = TestBed.createComponent(require('../../pages/admin-dashboard/admin-dashboard.component').AdminDashboardComponent);
+      const fixture = TestBed.createComponent(
+        require('../../pages/admin-dashboard/admin-dashboard.component')
+          .AdminDashboardComponent
+      );
       const component = fixture.componentInstance;
-      
+
       // Test 1: Tab visibility listener (3 points)
-      if (component.handleVisibilityChange ||
-          component.onVisibilityChange ||
-          component.visibilityListener ||
-          component.ngOnInit?.toString().includes('visibilitychange')) {
+      if (
+        component.handleVisibilityChange ||
+        component.onVisibilityChange ||
+        component.visibilityListener ||
+        component.ngOnInit?.toString().includes('visibilitychange')
+      ) {
         score += 3;
-        this.recordResult('Admin Dashboard', 'Tab Visibility Listener', true, 3, 3);
+        this.recordResult(
+          'Admin Dashboard',
+          'Tab Visibility Listener',
+          true,
+          3,
+          3
+        );
       } else {
-        this.recordResult('Admin Dashboard', 'Tab Visibility Listener', false, 0, 3, 'Tab visibility listener not found');
+        this.recordResult(
+          'Admin Dashboard',
+          'Tab Visibility Listener',
+          false,
+          0,
+          3,
+          'Tab visibility listener not found'
+        );
       }
 
       // Test 2: isTabVisible state (2 points)
-      if (component.isTabVisible !== undefined ||
-          component.state?.isTabVisible !== undefined) {
+      if (
+        component.isTabVisible !== undefined ||
+        component.state?.isTabVisible !== undefined
+      ) {
         score += 2;
-        this.recordResult('Admin Dashboard', 'Tab Visibility State', true, 2, 2);
+        this.recordResult(
+          'Admin Dashboard',
+          'Tab Visibility State',
+          true,
+          2,
+          2
+        );
       } else {
-        this.recordResult('Admin Dashboard', 'Tab Visibility State', false, 0, 2, 'Tab visibility state not implemented');
+        this.recordResult(
+          'Admin Dashboard',
+          'Tab Visibility State',
+          false,
+          0,
+          2,
+          'Tab visibility state not implemented'
+        );
       }
 
       // Test 3: Polling pause on hidden tab (1 point)
-      if (component.handleVisibilityChange?.toString().includes('stopPolling') ||
-          component.handleVisibilityChange?.toString().includes('pause') ||
-          component.onVisibilityChange?.toString().includes('stopPolling')) {
+      if (
+        component.handleVisibilityChange?.toString().includes('stopPolling') ||
+        component.handleVisibilityChange?.toString().includes('pause') ||
+        component.onVisibilityChange?.toString().includes('stopPolling')
+      ) {
         score += 1;
-        this.recordResult('Admin Dashboard', 'Polling Pause on Hidden', true, 1, 1);
+        this.recordResult(
+          'Admin Dashboard',
+          'Polling Pause on Hidden',
+          true,
+          1,
+          1
+        );
       } else {
-        this.recordResult('Admin Dashboard', 'Polling Pause on Hidden', false, 0, 1, 'Polling pause not implemented');
+        this.recordResult(
+          'Admin Dashboard',
+          'Polling Pause on Hidden',
+          false,
+          0,
+          1,
+          'Polling pause not implemented'
+        );
       }
-
     } catch (error) {
-      this.recordResult('Admin Dashboard', 'Tab Visibility Test', false, 0, 6, error.message);
+      this.recordResult(
+        'Admin Dashboard',
+        'Tab Visibility Test',
+        false,
+        0,
+        6,
+        error.message
+      );
     }
 
     return score;
@@ -716,39 +1188,79 @@ export class ObjectiveTestRunner {
     const startTime = Date.now();
 
     try {
-      const fixture = TestBed.createComponent(require('../../pages/admin-dashboard/admin-dashboard.component').AdminDashboardComponent);
+      const fixture = TestBed.createComponent(
+        require('../../pages/admin-dashboard/admin-dashboard.component')
+          .AdminDashboardComponent
+      );
       const component = fixture.componentInstance;
-      
+
       // Test 1: API service injection (1 point)
       if (component.apiService || component.api) {
         score += 1;
-        this.recordResult('Admin Dashboard', 'API Service Injection', true, 1, 1);
+        this.recordResult(
+          'Admin Dashboard',
+          'API Service Injection',
+          true,
+          1,
+          1
+        );
       } else {
-        this.recordResult('Admin Dashboard', 'API Service Injection', false, 0, 1, 'API service not injected');
+        this.recordResult(
+          'Admin Dashboard',
+          'API Service Injection',
+          false,
+          0,
+          1,
+          'API service not injected'
+        );
       }
 
       // Test 2: Load orders method (2 points)
-      if (typeof component.loadOrders === 'function' ||
-          typeof component.fetchOrders === 'function' ||
-          typeof component.getOrders === 'function') {
+      if (
+        typeof component.loadOrders === 'function' ||
+        typeof component.fetchOrders === 'function' ||
+        typeof component.getOrders === 'function'
+      ) {
         score += 2;
         this.recordResult('Admin Dashboard', 'Load Orders Method', true, 2, 2);
       } else {
-        this.recordResult('Admin Dashboard', 'Load Orders Method', false, 0, 2, 'Load orders method not found');
+        this.recordResult(
+          'Admin Dashboard',
+          'Load Orders Method',
+          false,
+          0,
+          2,
+          'Load orders method not found'
+        );
       }
 
       // Test 3: Update order API call (1 point)
-      if (component.updateOrderStatus?.toString().includes('updateOrderStatus') ||
-          component.updateOrderStatus?.toString().includes('patch') ||
-          component.updateOrderStatus?.toString().includes('put')) {
+      if (
+        component.updateOrderStatus?.toString().includes('updateOrderStatus') ||
+        component.updateOrderStatus?.toString().includes('patch') ||
+        component.updateOrderStatus?.toString().includes('put')
+      ) {
         score += 1;
         this.recordResult('Admin Dashboard', 'Update Order API', true, 1, 1);
       } else {
-        this.recordResult('Admin Dashboard', 'Update Order API', false, 0, 1, 'Update order API not implemented');
+        this.recordResult(
+          'Admin Dashboard',
+          'Update Order API',
+          false,
+          0,
+          1,
+          'Update order API not implemented'
+        );
       }
-
     } catch (error) {
-      this.recordResult('Admin Dashboard', 'Admin API Integration Test', false, 0, 4, error.message);
+      this.recordResult(
+        'Admin Dashboard',
+        'Admin API Integration Test',
+        false,
+        0,
+        4,
+        error.message
+      );
     }
 
     return score;
@@ -759,21 +1271,45 @@ export class ObjectiveTestRunner {
     const startTime = Date.now();
 
     try {
-      const fixture = TestBed.createComponent(require('../../pages/admin-dashboard/admin-dashboard.component').AdminDashboardComponent);
+      const fixture = TestBed.createComponent(
+        require('../../pages/admin-dashboard/admin-dashboard.component')
+          .AdminDashboardComponent
+      );
       const component = fixture.componentInstance;
-      
-      // Test 1: Local state update before API call (2 points)
-      if (typeof component.updateLocalOrder === 'function' ||
-          component.updateOrderStatus?.toString().includes('find') ||
-          component.updateOrderStatus?.toString().includes('map')) {
-        score += 2;
-        this.recordResult('Admin Dashboard', 'Optimistic UI Updates', true, 2, 2);
-      } else {
-        this.recordResult('Admin Dashboard', 'Optimistic UI Updates', false, 0, 2, 'Optimistic updates not implemented');
-      }
 
+      // Test 1: Local state update before API call (2 points)
+      if (
+        typeof component.updateLocalOrder === 'function' ||
+        component.updateOrderStatus?.toString().includes('find') ||
+        component.updateOrderStatus?.toString().includes('map')
+      ) {
+        score += 2;
+        this.recordResult(
+          'Admin Dashboard',
+          'Optimistic UI Updates',
+          true,
+          2,
+          2
+        );
+      } else {
+        this.recordResult(
+          'Admin Dashboard',
+          'Optimistic UI Updates',
+          false,
+          0,
+          2,
+          'Optimistic updates not implemented'
+        );
+      }
     } catch (error) {
-      this.recordResult('Admin Dashboard', 'Optimistic Updates Test', false, 0, 2, error.message);
+      this.recordResult(
+        'Admin Dashboard',
+        'Optimistic Updates Test',
+        false,
+        0,
+        2,
+        error.message
+      );
     }
 
     return score;
@@ -784,30 +1320,63 @@ export class ObjectiveTestRunner {
     const startTime = Date.now();
 
     try {
-      const fixture = TestBed.createComponent(require('../../pages/admin-dashboard/admin-dashboard.component').AdminDashboardComponent);
+      const fixture = TestBed.createComponent(
+        require('../../pages/admin-dashboard/admin-dashboard.component')
+          .AdminDashboardComponent
+      );
       const component = fixture.componentInstance;
       const compiled = fixture.nativeElement;
-      
+
       // Test 1: Error state management (1 point)
-      if (component.error !== undefined || 
-          component.state?.error !== undefined) {
+      if (
+        component.error !== undefined ||
+        component.state?.error !== undefined
+      ) {
         score += 1;
-        this.recordResult('Admin Dashboard', 'Error State Management', true, 1, 1);
+        this.recordResult(
+          'Admin Dashboard',
+          'Error State Management',
+          true,
+          1,
+          1
+        );
       } else {
-        this.recordResult('Admin Dashboard', 'Error State Management', false, 0, 1, 'Error state not implemented');
+        this.recordResult(
+          'Admin Dashboard',
+          'Error State Management',
+          false,
+          0,
+          1,
+          'Error state not implemented'
+        );
       }
 
       // Test 2: Error UI display (1 point)
-      const hasErrorUI = compiled.querySelector('.error, .alert, app-error-boundary');
+      const hasErrorUI = compiled.querySelector(
+        '.error, .alert, app-error-boundary'
+      );
       if (hasErrorUI) {
         score += 1;
         this.recordResult('Admin Dashboard', 'Error UI Display', true, 1, 1);
       } else {
-        this.recordResult('Admin Dashboard', 'Error UI Display', false, 0, 1, 'Error UI not found');
+        this.recordResult(
+          'Admin Dashboard',
+          'Error UI Display',
+          false,
+          0,
+          1,
+          'Error UI not found'
+        );
       }
-
     } catch (error) {
-      this.recordResult('Admin Dashboard', 'Admin Error Handling Test', false, 0, 2, error.message);
+      this.recordResult(
+        'Admin Dashboard',
+        'Admin Error Handling Test',
+        false,
+        0,
+        2,
+        error.message
+      );
     }
 
     return score;
@@ -818,21 +1387,39 @@ export class ObjectiveTestRunner {
     const startTime = Date.now();
 
     try {
-      const fixture = TestBed.createComponent(require('../../pages/admin-dashboard/admin-dashboard.component').AdminDashboardComponent);
+      const fixture = TestBed.createComponent(
+        require('../../pages/admin-dashboard/admin-dashboard.component')
+          .AdminDashboardComponent
+      );
       const component = fixture.componentInstance;
-      
+
       // Test 1: Proper subscription cleanup (1 point)
-      if (typeof component.ngOnDestroy === 'function' &&
-          (component.ngOnDestroy.toString().includes('unsubscribe') ||
-           component.ngOnDestroy.toString().includes('stopPolling'))) {
+      if (
+        typeof component.ngOnDestroy === 'function' &&
+        (component.ngOnDestroy.toString().includes('unsubscribe') ||
+          component.ngOnDestroy.toString().includes('stopPolling'))
+      ) {
         score += 1;
         this.recordResult('Admin Dashboard', 'Polling Cleanup', true, 1, 1);
       } else {
-        this.recordResult('Admin Dashboard', 'Polling Cleanup', false, 0, 1, 'Polling cleanup not implemented');
+        this.recordResult(
+          'Admin Dashboard',
+          'Polling Cleanup',
+          false,
+          0,
+          1,
+          'Polling cleanup not implemented'
+        );
       }
-
     } catch (error) {
-      this.recordResult('Admin Dashboard', 'Polling Performance Test', false, 0, 1, error.message);
+      this.recordResult(
+        'Admin Dashboard',
+        'Polling Performance Test',
+        false,
+        0,
+        1,
+        error.message
+      );
     }
 
     return score;
@@ -847,42 +1434,90 @@ export class ObjectiveTestRunner {
     const startTime = Date.now();
 
     try {
-      const fixture = TestBed.createComponent(require('../../pages/order-history/order-history.component').OrderHistoryComponent);
+      const fixture = TestBed.createComponent(
+        require('../../pages/order-history/order-history.component')
+          .OrderHistoryComponent
+      );
       const component = fixture.componentInstance;
       const compiled = fixture.nativeElement;
-      
+
       // Test 1: Reactive form implementation (2 points)
-      if (component.complaintForm ||
-          component.form ||
-          compiled.querySelector('form[formGroup]')) {
+      if (
+        component.complaintForm ||
+        component.form ||
+        compiled.querySelector('form[formGroup]')
+      ) {
         score += 2;
-        this.recordResult('Complaint Forms', 'Reactive Form Implementation', true, 2, 2);
+        this.recordResult(
+          'Complaint Forms',
+          'Reactive Form Implementation',
+          true,
+          2,
+          2
+        );
       } else {
-        this.recordResult('Complaint Forms', 'Reactive Form Implementation', false, 0, 2, 'Reactive form not implemented');
+        this.recordResult(
+          'Complaint Forms',
+          'Reactive Form Implementation',
+          false,
+          0,
+          2,
+          'Reactive form not implemented'
+        );
       }
 
       // Test 2: Form validation rules (2 points)
-      if (component.complaintForm?.get ||
-          component.form?.get ||
-          compiled.querySelector('input[required], select[required]')) {
+      if (
+        component.complaintForm?.get ||
+        component.form?.get ||
+        compiled.querySelector('input[required], select[required]')
+      ) {
         score += 2;
-        this.recordResult('Complaint Forms', 'Form Validation Rules', true, 2, 2);
+        this.recordResult(
+          'Complaint Forms',
+          'Form Validation Rules',
+          true,
+          2,
+          2
+        );
       } else {
-        this.recordResult('Complaint Forms', 'Form Validation Rules', false, 0, 2, 'Form validation not implemented');
+        this.recordResult(
+          'Complaint Forms',
+          'Form Validation Rules',
+          false,
+          0,
+          2,
+          'Form validation not implemented'
+        );
       }
 
       // Test 3: Custom validators (2 points)
-      if (typeof component.customValidator === 'function' ||
-          typeof component.validateComplaint === 'function' ||
-          component.complaintForm?.validator) {
+      if (
+        typeof component.customValidator === 'function' ||
+        typeof component.validateComplaint === 'function' ||
+        component.complaintForm?.validator
+      ) {
         score += 2;
         this.recordResult('Complaint Forms', 'Custom Validators', true, 2, 2);
       } else {
-        this.recordResult('Complaint Forms', 'Custom Validators', false, 0, 2, 'Custom validators not implemented');
+        this.recordResult(
+          'Complaint Forms',
+          'Custom Validators',
+          false,
+          0,
+          2,
+          'Custom validators not implemented'
+        );
       }
-
     } catch (error) {
-      this.recordResult('Complaint Forms', 'Form Validation Test', false, 0, 6, error.message);
+      this.recordResult(
+        'Complaint Forms',
+        'Form Validation Test',
+        false,
+        0,
+        6,
+        error.message
+      );
     }
 
     return score;
@@ -893,45 +1528,81 @@ export class ObjectiveTestRunner {
     const startTime = Date.now();
 
     try {
-      const fixture = TestBed.createComponent(require('../../pages/order-history/order-history.component').OrderHistoryComponent);
+      const fixture = TestBed.createComponent(
+        require('../../pages/order-history/order-history.component')
+          .OrderHistoryComponent
+      );
       const component = fixture.componentInstance;
       const compiled = fixture.nativeElement;
-      
+
       // Test 1: Submit complaint method (2 points)
-      if (typeof component.submitComplaint === 'function' ||
-          typeof component.onSubmit === 'function') {
+      if (
+        typeof component.submitComplaint === 'function' ||
+        typeof component.onSubmit === 'function'
+      ) {
         score += 2;
         this.recordResult('Complaint Forms', 'Submit Method', true, 2, 2);
       } else {
-        this.recordResult('Complaint Forms', 'Submit Method', false, 0, 2, 'Submit method not found');
+        this.recordResult(
+          'Complaint Forms',
+          'Submit Method',
+          false,
+          0,
+          2,
+          'Submit method not found'
+        );
       }
 
       // Test 2: Form submission UI (2 points)
-      const hasSubmitUI = compiled.querySelector('button[type="submit"], .submit-button') ||
-                         Array.from(compiled.querySelectorAll('button')).some(btn => 
-                           btn.textContent?.toLowerCase().includes('submit') ||
-                           btn.textContent?.toLowerCase().includes('send')
-                         );
-      
+      const hasSubmitUI =
+        compiled.querySelector('button[type="submit"], .submit-button') ||
+        Array.from(compiled.querySelectorAll('button')).some(
+          (btn) =>
+            btn.textContent?.toLowerCase().includes('submit') ||
+            btn.textContent?.toLowerCase().includes('send')
+        );
+
       if (hasSubmitUI) {
         score += 2;
         this.recordResult('Complaint Forms', 'Submit UI', true, 2, 2);
       } else {
-        this.recordResult('Complaint Forms', 'Submit UI', false, 0, 2, 'Submit UI not found');
+        this.recordResult(
+          'Complaint Forms',
+          'Submit UI',
+          false,
+          0,
+          2,
+          'Submit UI not found'
+        );
       }
 
       // Test 3: Loading states (2 points)
-      if (component.isSubmitting !== undefined ||
-          component.loading !== undefined ||
-          component.state?.submitting !== undefined) {
+      if (
+        component.isSubmitting !== undefined ||
+        component.loading !== undefined ||
+        component.state?.submitting !== undefined
+      ) {
         score += 2;
         this.recordResult('Complaint Forms', 'Loading States', true, 2, 2);
       } else {
-        this.recordResult('Complaint Forms', 'Loading States', false, 0, 2, 'Loading states not implemented');
+        this.recordResult(
+          'Complaint Forms',
+          'Loading States',
+          false,
+          0,
+          2,
+          'Loading states not implemented'
+        );
       }
-
     } catch (error) {
-      this.recordResult('Complaint Forms', 'Form Submission Test', false, 0, 6, error.message);
+      this.recordResult(
+        'Complaint Forms',
+        'Form Submission Test',
+        false,
+        0,
+        6,
+        error.message
+      );
     }
 
     return score;
@@ -942,41 +1613,77 @@ export class ObjectiveTestRunner {
     const startTime = Date.now();
 
     try {
-      const fixture = TestBed.createComponent(require('../../pages/order-history/order-history.component').OrderHistoryComponent);
+      const fixture = TestBed.createComponent(
+        require('../../pages/order-history/order-history.component')
+          .OrderHistoryComponent
+      );
       const component = fixture.componentInstance;
-      
+
       // Test 1: Form state tracking (2 points)
-      if (component.showComplaintForm !== undefined ||
-          component.state?.showForm !== undefined ||
-          component.selectedOrder !== undefined) {
+      if (
+        component.showComplaintForm !== undefined ||
+        component.state?.showForm !== undefined ||
+        component.selectedOrder !== undefined
+      ) {
         score += 2;
         this.recordResult('Complaint Forms', 'Form State Tracking', true, 2, 2);
       } else {
-        this.recordResult('Complaint Forms', 'Form State Tracking', false, 0, 2, 'Form state not implemented');
+        this.recordResult(
+          'Complaint Forms',
+          'Form State Tracking',
+          false,
+          0,
+          2,
+          'Form state not implemented'
+        );
       }
 
       // Test 2: Form reset functionality (2 points)
-      if (typeof component.resetForm === 'function' ||
-          typeof component.clearForm === 'function' ||
-          component.submitComplaint?.toString().includes('reset')) {
+      if (
+        typeof component.resetForm === 'function' ||
+        typeof component.clearForm === 'function' ||
+        component.submitComplaint?.toString().includes('reset')
+      ) {
         score += 2;
         this.recordResult('Complaint Forms', 'Form Reset', true, 2, 2);
       } else {
-        this.recordResult('Complaint Forms', 'Form Reset', false, 0, 2, 'Form reset not implemented');
+        this.recordResult(
+          'Complaint Forms',
+          'Form Reset',
+          false,
+          0,
+          2,
+          'Form reset not implemented'
+        );
       }
 
       // Test 3: Modal/dialog integration (2 points)
-      if (component.showModal !== undefined ||
-          component.isModalOpen !== undefined ||
-          typeof component.openComplaintModal === 'function') {
+      if (
+        component.showModal !== undefined ||
+        component.isModalOpen !== undefined ||
+        typeof component.openComplaintModal === 'function'
+      ) {
         score += 2;
         this.recordResult('Complaint Forms', 'Modal Integration', true, 2, 2);
       } else {
-        this.recordResult('Complaint Forms', 'Modal Integration', false, 0, 2, 'Modal integration not implemented');
+        this.recordResult(
+          'Complaint Forms',
+          'Modal Integration',
+          false,
+          0,
+          2,
+          'Modal integration not implemented'
+        );
       }
-
     } catch (error) {
-      this.recordResult('Complaint Forms', 'Form State Management Test', false, 0, 6, error.message);
+      this.recordResult(
+        'Complaint Forms',
+        'Form State Management Test',
+        false,
+        0,
+        6,
+        error.message
+      );
     }
 
     return score;
@@ -987,39 +1694,91 @@ export class ObjectiveTestRunner {
     const startTime = Date.now();
 
     try {
-      const fixture = TestBed.createComponent(require('../../pages/order-history/order-history.component').OrderHistoryComponent);
+      const fixture = TestBed.createComponent(
+        require('../../pages/order-history/order-history.component')
+          .OrderHistoryComponent
+      );
       const component = fixture.componentInstance;
-      
+
       // Test 1: API service injection (1 point)
       if (component.apiService || component.api) {
         score += 1;
-        this.recordResult('Complaint Forms', 'API Service Injection', true, 1, 1);
+        this.recordResult(
+          'Complaint Forms',
+          'API Service Injection',
+          true,
+          1,
+          1
+        );
       } else {
-        this.recordResult('Complaint Forms', 'API Service Injection', false, 0, 1, 'API service not injected');
+        this.recordResult(
+          'Complaint Forms',
+          'API Service Injection',
+          false,
+          0,
+          1,
+          'API service not injected'
+        );
       }
 
       // Test 2: Submit complaint API call (2 points)
-      if (component.submitComplaint?.toString().includes('submitComplaint') ||
-          component.submitComplaint?.toString().includes('complaint') ||
-          component.submitComplaint?.toString().includes('post')) {
+      if (
+        component.submitComplaint?.toString().includes('submitComplaint') ||
+        component.submitComplaint?.toString().includes('complaint') ||
+        component.submitComplaint?.toString().includes('post')
+      ) {
         score += 2;
-        this.recordResult('Complaint Forms', 'Submit Complaint API', true, 2, 2);
+        this.recordResult(
+          'Complaint Forms',
+          'Submit Complaint API',
+          true,
+          2,
+          2
+        );
       } else {
-        this.recordResult('Complaint Forms', 'Submit Complaint API', false, 0, 2, 'Submit complaint API not implemented');
+        this.recordResult(
+          'Complaint Forms',
+          'Submit Complaint API',
+          false,
+          0,
+          2,
+          'Submit complaint API not implemented'
+        );
       }
 
       // Test 3: API response handling (1 point)
-      if (component.submitComplaint?.toString().includes('subscribe') ||
-          component.submitComplaint?.toString().includes('then') ||
-          component.submitComplaint?.toString().includes('catch')) {
+      if (
+        component.submitComplaint?.toString().includes('subscribe') ||
+        component.submitComplaint?.toString().includes('then') ||
+        component.submitComplaint?.toString().includes('catch')
+      ) {
         score += 1;
-        this.recordResult('Complaint Forms', 'API Response Handling', true, 1, 1);
+        this.recordResult(
+          'Complaint Forms',
+          'API Response Handling',
+          true,
+          1,
+          1
+        );
       } else {
-        this.recordResult('Complaint Forms', 'API Response Handling', false, 0, 1, 'API response handling not implemented');
+        this.recordResult(
+          'Complaint Forms',
+          'API Response Handling',
+          false,
+          0,
+          1,
+          'API response handling not implemented'
+        );
       }
-
     } catch (error) {
-      this.recordResult('Complaint Forms', 'Complaint API Integration Test', false, 0, 4, error.message);
+      this.recordResult(
+        'Complaint Forms',
+        'Complaint API Integration Test',
+        false,
+        0,
+        4,
+        error.message
+      );
     }
 
     return score;
@@ -1030,30 +1789,57 @@ export class ObjectiveTestRunner {
     const startTime = Date.now();
 
     try {
-      const fixture = TestBed.createComponent(require('../../pages/order-history/order-history.component').OrderHistoryComponent);
+      const fixture = TestBed.createComponent(
+        require('../../pages/order-history/order-history.component')
+          .OrderHistoryComponent
+      );
       const component = fixture.componentInstance;
-      
+
       // Test 1: Load orders method (1 point)
-      if (typeof component.loadOrders === 'function' ||
-          typeof component.getOrders === 'function' ||
-          typeof component.fetchUserOrders === 'function') {
+      if (
+        typeof component.loadOrders === 'function' ||
+        typeof component.getOrders === 'function' ||
+        typeof component.fetchUserOrders === 'function'
+      ) {
         score += 1;
         this.recordResult('Complaint Forms', 'Load Orders Method', true, 1, 1);
       } else {
-        this.recordResult('Complaint Forms', 'Load Orders Method', false, 0, 1, 'Load orders method not found');
+        this.recordResult(
+          'Complaint Forms',
+          'Load Orders Method',
+          false,
+          0,
+          1,
+          'Load orders method not found'
+        );
       }
 
       // Test 2: Orders display (1 point)
-      if (component.orders !== undefined ||
-          component.userOrders !== undefined) {
+      if (
+        component.orders !== undefined ||
+        component.userOrders !== undefined
+      ) {
         score += 1;
         this.recordResult('Complaint Forms', 'Orders Display', true, 1, 1);
       } else {
-        this.recordResult('Complaint Forms', 'Orders Display', false, 0, 1, 'Orders display not implemented');
+        this.recordResult(
+          'Complaint Forms',
+          'Orders Display',
+          false,
+          0,
+          1,
+          'Orders display not implemented'
+        );
       }
-
     } catch (error) {
-      this.recordResult('Complaint Forms', 'Order History API Test', false, 0, 2, error.message);
+      this.recordResult(
+        'Complaint Forms',
+        'Order History API Test',
+        false,
+        0,
+        2,
+        error.message
+      );
     }
 
     return score;
@@ -1064,24 +1850,41 @@ export class ObjectiveTestRunner {
     const startTime = Date.now();
 
     try {
-      const fixture = TestBed.createComponent(require('../../pages/order-history/order-history.component').OrderHistoryComponent);
+      const fixture = TestBed.createComponent(
+        require('../../pages/order-history/order-history.component')
+          .OrderHistoryComponent
+      );
       const component = fixture.componentInstance;
       const compiled = fixture.nativeElement;
-      
+
       // Test 1: Form error display (1 point)
-      const hasFormErrors = compiled.querySelector('.error, .invalid, .ng-invalid') ||
-                           component.getFieldError ||
-                           component.hasError;
-      
+      const hasFormErrors =
+        compiled.querySelector('.error, .invalid, .ng-invalid') ||
+        component.getFieldError ||
+        component.hasError;
+
       if (hasFormErrors) {
         score += 1;
         this.recordResult('Complaint Forms', 'Form Error Display', true, 1, 1);
       } else {
-        this.recordResult('Complaint Forms', 'Form Error Display', false, 0, 1, 'Form error display not implemented');
+        this.recordResult(
+          'Complaint Forms',
+          'Form Error Display',
+          false,
+          0,
+          1,
+          'Form error display not implemented'
+        );
       }
-
     } catch (error) {
-      this.recordResult('Complaint Forms', 'Form Error Handling Test', false, 0, 1, error.message);
+      this.recordResult(
+        'Complaint Forms',
+        'Form Error Handling Test',
+        false,
+        0,
+        1,
+        error.message
+      );
     }
 
     return score;
@@ -1092,21 +1895,39 @@ export class ObjectiveTestRunner {
     const startTime = Date.now();
 
     try {
-      const fixture = TestBed.createComponent(require('../../pages/order-history/order-history.component').OrderHistoryComponent);
+      const fixture = TestBed.createComponent(
+        require('../../pages/order-history/order-history.component')
+          .OrderHistoryComponent
+      );
       const component = fixture.componentInstance;
-      
+
       // Test 1: Form cleanup (1 point)
-      if (typeof component.ngOnDestroy === 'function' &&
-          (component.ngOnDestroy.toString().includes('unsubscribe') ||
-           component.ngOnDestroy.toString().includes('destroy'))) {
+      if (
+        typeof component.ngOnDestroy === 'function' &&
+        (component.ngOnDestroy.toString().includes('unsubscribe') ||
+          component.ngOnDestroy.toString().includes('destroy'))
+      ) {
         score += 1;
         this.recordResult('Complaint Forms', 'Form Cleanup', true, 1, 1);
       } else {
-        this.recordResult('Complaint Forms', 'Form Cleanup', false, 0, 1, 'Form cleanup not implemented');
+        this.recordResult(
+          'Complaint Forms',
+          'Form Cleanup',
+          false,
+          0,
+          1,
+          'Form cleanup not implemented'
+        );
       }
-
     } catch (error) {
-      this.recordResult('Complaint Forms', 'Form Performance Test', false, 0, 1, error.message);
+      this.recordResult(
+        'Complaint Forms',
+        'Form Performance Test',
+        false,
+        0,
+        1,
+        error.message
+      );
     }
 
     return score;
@@ -1149,9 +1970,9 @@ export class ObjectiveTestRunner {
         'app.component.ts',
         'shared/pizza-list/pizza-list.component.ts',
         'pages/admin-dashboard/admin-dashboard.component.ts',
-        'pages/order-history/order-history.component.ts'
+        'pages/order-history/order-history.component.ts',
       ];
-      
+
       // Mock check - in real implementation, check file system
       return true;
     } catch (error) {
@@ -1161,7 +1982,7 @@ export class ObjectiveTestRunner {
 
   private async testE2EUserFlow(): Promise<number> {
     let score = 0;
-    
+
     try {
       // Smoke Test 1: App loads without errors (3 points)
       const appLoads = await this.testAppLoading();
@@ -1169,7 +1990,14 @@ export class ObjectiveTestRunner {
         score += 3;
         this.recordResult('E2E Smoke', 'App Loads Successfully', true, 3, 3);
       } else {
-        this.recordResult('E2E Smoke', 'App Loads Successfully', false, 0, 3, 'App failed to load');
+        this.recordResult(
+          'E2E Smoke',
+          'App Loads Successfully',
+          false,
+          0,
+          3,
+          'App failed to load'
+        );
       }
 
       // Smoke Test 2: Navigation works (3 points)
@@ -1178,16 +2006,35 @@ export class ObjectiveTestRunner {
         score += 3;
         this.recordResult('E2E Smoke', 'Basic Navigation', true, 3, 3);
       } else {
-        this.recordResult('E2E Smoke', 'Basic Navigation', false, 0, 3, 'Navigation failed');
+        this.recordResult(
+          'E2E Smoke',
+          'Basic Navigation',
+          false,
+          0,
+          3,
+          'Navigation failed'
+        );
       }
 
       // Smoke Test 3: Core features accessible (4 points)
       const featuresAccessible = await this.testFeatureAccessibility();
       score += featuresAccessible;
-      this.recordResult('E2E Smoke', 'Feature Accessibility', featuresAccessible > 0, featuresAccessible, 4);
-
+      this.recordResult(
+        'E2E Smoke',
+        'Feature Accessibility',
+        featuresAccessible > 0,
+        featuresAccessible,
+        4
+      );
     } catch (error) {
-      this.recordResult('E2E Smoke', 'User Flow Test', false, 0, 10, error.message);
+      this.recordResult(
+        'E2E Smoke',
+        'User Flow Test',
+        false,
+        0,
+        10,
+        error.message
+      );
     }
 
     return score;
@@ -1213,13 +2060,13 @@ export class ObjectiveTestRunner {
 
   private async testFeatureAccessibility(): Promise<number> {
     let score = 0;
-    
+
     try {
       // Test if pizza list is accessible (1 point)
       // Test if admin dashboard is accessible (1 point)
       // Test if order history is accessible (1 point)
       // Test if forms are interactive (1 point)
-      
+
       // Mock implementation
       return 2; // Partial credit
     } catch (error) {
@@ -1229,7 +2076,7 @@ export class ObjectiveTestRunner {
 
   private async testE2ENetworkCalls(): Promise<number> {
     let score = 0;
-    
+
     try {
       // Smoke Test 1: API calls are made (5 points)
       const apiCallsMade = await this.testAPICallsAreMade();
@@ -1237,7 +2084,14 @@ export class ObjectiveTestRunner {
         score += 5;
         this.recordResult('E2E Smoke', 'API Calls Made', true, 5, 5);
       } else {
-        this.recordResult('E2E Smoke', 'API Calls Made', false, 0, 5, 'No API calls detected');
+        this.recordResult(
+          'E2E Smoke',
+          'API Calls Made',
+          false,
+          0,
+          5,
+          'No API calls detected'
+        );
       }
 
       // Smoke Test 2: Network error handling (5 points)
@@ -1246,11 +2100,24 @@ export class ObjectiveTestRunner {
         score += 5;
         this.recordResult('E2E Smoke', 'Network Error Handling', true, 5, 5);
       } else {
-        this.recordResult('E2E Smoke', 'Network Error Handling', false, 0, 5, 'Error handling not detected');
+        this.recordResult(
+          'E2E Smoke',
+          'Network Error Handling',
+          false,
+          0,
+          5,
+          'Error handling not detected'
+        );
       }
-
     } catch (error) {
-      this.recordResult('E2E Smoke', 'Network Calls Test', false, 0, 10, error.message);
+      this.recordResult(
+        'E2E Smoke',
+        'Network Calls Test',
+        false,
+        0,
+        10,
+        error.message
+      );
     }
 
     return score;
@@ -1278,8 +2145,14 @@ export class ObjectiveTestRunner {
   // 📊 RESULT GENERATION
   // ====================================================================
 
-  private generateFinalResults(componentFeatures: FeatureScore[], e2eScore: number): ObjectiveTestResults {
-    const componentScore = componentFeatures.reduce((sum, feature) => sum + feature.total, 0);
+  private generateFinalResults(
+    componentFeatures: FeatureScore[],
+    e2eScore: number
+  ): ObjectiveTestResults {
+    const componentScore = componentFeatures.reduce(
+      (sum, feature) => sum + feature.total,
+      0
+    );
     const totalScore = componentScore + e2eScore;
     const executionTime = Date.now() - this.startTime;
 
@@ -1291,35 +2164,37 @@ export class ObjectiveTestRunner {
       totalScore,
       features: componentFeatures,
       summary: {
-        passed: this.results.filter(r => r.passed).length,
-        failed: this.results.filter(r => !r.passed).length,
+        passed: this.results.filter((r) => r.passed).length,
+        failed: this.results.filter((r) => !r.passed).length,
         total: this.results.length,
-        executionTime
+        executionTime,
       },
-      recommendation
+      recommendation,
     };
   }
 
   private generateFailureResults(error: any): ObjectiveTestResults {
     return {
       componentScore: 0,
-      e2eScore: 0, 
+      e2eScore: 0,
       totalScore: 0,
       features: [],
       summary: {
         passed: 0,
         failed: 1,
         total: 1,
-        executionTime: Date.now() - this.startTime
+        executionTime: Date.now() - this.startTime,
       },
-      recommendation: 'FAIL'
+      recommendation: 'FAIL',
     };
   }
 
-  private determineRecommendation(totalScore: number): 'PASS' | 'FAIL' | 'PARTIAL' {
-    if (totalScore >= 70) return 'PASS';      // 70+ points = Pass
-    if (totalScore >= 40) return 'PARTIAL';   // 40-69 points = Partial
-    return 'FAIL';                            // < 40 points = Fail
+  private determineRecommendation(
+    totalScore: number
+  ): 'PASS' | 'FAIL' | 'PARTIAL' {
+    if (totalScore >= 70) return 'PASS'; // 70+ points = Pass
+    if (totalScore >= 40) return 'PARTIAL'; // 40-69 points = Partial
+    return 'FAIL'; // < 40 points = Fail
   }
 
   // ====================================================================
@@ -1339,13 +2214,15 @@ export class ObjectiveTestRunner {
           // Method 3: Check if file exists and provide fallback
           const absolutePath = path.resolve(__dirname, componentPath);
           if (fs.existsSync(absolutePath + '.ts')) {
-            console.log(`⚠️ Component exists but cannot be imported: ${componentPath}`);
+            console.log(
+              `⚠️ Component exists but cannot be imported: ${componentPath}`
+            );
             return this.createMockComponent();
           }
         } catch (fsError) {
           // File doesn't exist or filesystem error
         }
-        
+
         // Method 4: Return null to indicate component not found
         return null;
       }
@@ -1362,59 +2239,90 @@ export class ObjectiveTestRunner {
         isPolling = false;
         complaintForm = null;
         apiService = null;
-        
+
         loadPizzas() {}
         addToCart() {}
         updateOrderStatus() {}
         submitComplaint() {}
         ngOnDestroy() {}
-      }
+      },
     };
   }
 
-  private async testComponentExistence(componentPath: string, featureName: string): Promise<boolean> {
+  private async testComponentExistence(
+    componentPath: string,
+    featureName: string
+  ): Promise<boolean> {
     try {
       const absolutePath = path.resolve(__dirname, componentPath);
-      const exists = fs.existsSync(absolutePath + '.ts') || fs.existsSync(absolutePath + '.js');
-      
+      const exists =
+        fs.existsSync(absolutePath + '.ts') ||
+        fs.existsSync(absolutePath + '.js');
+
       if (exists) {
         this.recordResult(featureName, 'Component File Exists', true, 1, 1);
         return true;
       } else {
-        this.recordResult(featureName, 'Component File Exists', false, 0, 1, `Component file not found: ${componentPath}`);
+        this.recordResult(
+          featureName,
+          'Component File Exists',
+          false,
+          0,
+          1,
+          `Component file not found: ${componentPath}`
+        );
         return false;
       }
     } catch (error) {
-      this.recordResult(featureName, 'Component File Check', false, 0, 1, error.message);
+      this.recordResult(
+        featureName,
+        'Component File Check',
+        false,
+        0,
+        1,
+        error.message
+      );
       return false;
     }
   }
 
-  private async fallbackStructuralAnalysis(componentPath: string, featureName: string): Promise<number> {
+  private async fallbackStructuralAnalysis(
+    componentPath: string,
+    featureName: string
+  ): Promise<number> {
     let score = 0;
-    
+
     try {
       const absolutePath = path.resolve(__dirname, componentPath);
-      
+
       if (!fs.existsSync(absolutePath + '.ts')) {
         return 0;
       }
-      
+
       const fileContent = fs.readFileSync(absolutePath + '.ts', 'utf8');
-      
+
       // Structural analysis based on code patterns
       score += this.analyzeCodeStructure(fileContent, featureName);
-      
     } catch (error) {
-      this.recordResult(featureName, 'Structural Analysis', false, 0, 1, error.message);
+      this.recordResult(
+        featureName,
+        'Structural Analysis',
+        false,
+        0,
+        1,
+        error.message
+      );
     }
-    
+
     return score;
   }
 
-  private analyzeCodeStructure(fileContent: string, featureName: string): number {
+  private analyzeCodeStructure(
+    fileContent: string,
+    featureName: string
+  ): number {
     let score = 0;
-    
+
     // Check for common Angular patterns
     const patterns = {
       'Component Decorator': /@Component\s*\(/,
@@ -1424,16 +2332,22 @@ export class ObjectiveTestRunner {
       'Lifecycle Hooks': /ngOnInit|ngOnDestroy/,
       'State Management': /state|currentFilter|currentSort/,
       'Error Handling': /catch|error|Error/,
-      'Subscription Management': /subscribe|unsubscribe|takeUntil/
+      'Subscription Management': /subscribe|unsubscribe|takeUntil/,
     };
-    
+
     for (const [patternName, regex] of Object.entries(patterns)) {
       if (regex.test(fileContent)) {
         score += 0.5;
-        this.recordResult(featureName, `Pattern: ${patternName}`, true, 0.5, 0.5);
+        this.recordResult(
+          featureName,
+          `Pattern: ${patternName}`,
+          true,
+          0.5,
+          0.5
+        );
       }
     }
-    
+
     return Math.min(score, 5); // Cap at 5 points for structural analysis
   }
 
@@ -1441,38 +2355,60 @@ export class ObjectiveTestRunner {
   // 🎯 UTILITY METHODS
   // ====================================================================
 
-  private recordResult(feature: string, testName: string, passed: boolean, points: number, maxPoints: number, error?: string): void {
+  private recordResult(
+    feature: string,
+    testName: string,
+    passed: boolean,
+    points: number,
+    maxPoints: number,
+    error?: string
+  ): void {
     this.results.push({
       feature,
-      testName, 
+      testName,
       passed,
       points: passed ? points : 0,
       maxPoints,
       error,
-      duration: 0
+      duration: 0,
     });
   }
 
   printResults(results: ObjectiveTestResults): void {
     console.log('\n🎯 OBJECTIVE TEST RESULTS:');
     console.log('=========================');
-    
-    results.features.forEach(feature => {
-      const status = feature.percentage >= 70 ? '✅' : feature.percentage >= 40 ? '⚠️' : '❌';
-      console.log(`${feature.featureName}: ${feature.total}/${feature.maxTotal} (${feature.percentage}%) ${status}`);
+
+    results.features.forEach((feature) => {
+      const status =
+        feature.percentage >= 70
+          ? '✅'
+          : feature.percentage >= 40
+          ? '⚠️'
+          : '❌';
+      console.log(
+        `${feature.featureName}: ${feature.total}/${feature.maxTotal} (${feature.percentage}%) ${status}`
+      );
     });
 
     console.log(`\nComponent Score: ${results.componentScore}/80`);
     console.log(`E2E Bonus: ${results.e2eScore}/20`);
-    console.log(`TOTAL SCORE: ${results.totalScore}/100 - ${results.recommendation} ${this.getRecommendationEmoji(results.recommendation)}`);
+    console.log(
+      `TOTAL SCORE: ${results.totalScore}/100 - ${
+        results.recommendation
+      } ${this.getRecommendationEmoji(results.recommendation)}`
+    );
   }
 
   private getRecommendationEmoji(recommendation: string): string {
     switch (recommendation) {
-      case 'PASS': return '✅';
-      case 'PARTIAL': return '⚠️';
-      case 'FAIL': return '❌';
-      default: return '❓';
+      case 'PASS':
+        return '✅';
+      case 'PARTIAL':
+        return '⚠️';
+      case 'FAIL':
+        return '❌';
+      default:
+        return '❓';
     }
   }
 }

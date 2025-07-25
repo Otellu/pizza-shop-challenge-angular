@@ -23,29 +23,40 @@ export interface LoginResponse {
   token: string;
 }
 
+export interface OrderItem {
+  pizza: Pizza;
+  size: string;
+  quantity: number;
+  price: number;
+}
+
 export interface Order {
   id: string;
-  items: Pizza[];
+  items: OrderItem[];
   totalAmount: number;
   customerInfo: {
     name: string;
     address: string;
   };
+  deliveryAddress?: string;
   user?: {
     name: string;
     email: string;
   };
-  status: 'pending' | 'confirmed' | 'preparing' | 'out_for_delivery' | 'delivered';
+  status:
+    | 'pending'
+    | 'confirmed'
+    | 'preparing'
+    | 'out_for_delivery'
+    | 'delivered';
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CreateOrderData {
   items: Pizza[];
-  customerInfo: {
-    name: string;
-    address: string;
-  };
+  deliveryAddress: string;
+  totalAmount: number;
 }
 
 export interface PizzaQueryParams {
@@ -56,7 +67,7 @@ export interface PizzaQueryParams {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ApiService {
   private http = inject(HttpClient);
@@ -65,22 +76,30 @@ export class ApiService {
   // Auth API
   login(credentials: LoginCredentials): Observable<LoginResponse> {
     const headers = {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     };
-    return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, credentials, { headers });
+    return this.http.post<LoginResponse>(
+      `${this.apiUrl}/auth/login`,
+      credentials,
+      { headers }
+    );
   }
 
   signup(userData: SignupData): Observable<LoginResponse> {
     const headers = {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     };
-    return this.http.post<LoginResponse>(`${this.apiUrl}/auth/signup`, userData, { headers });
+    return this.http.post<LoginResponse>(
+      `${this.apiUrl}/auth/signup`,
+      userData,
+      { headers }
+    );
   }
 
   // Pizza API
   getAllPizzas(): Observable<Pizza[]> {
     const headers = {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     };
     return this.http.get<Pizza[]>(`${this.apiUrl}/pizzas`, { headers });
   }
@@ -92,7 +111,7 @@ export class ApiService {
     totalPages: number;
   }> {
     let params = new HttpParams();
-    
+
     if (queryParams.filter) {
       params = params.append('filter', queryParams.filter);
     }
@@ -107,7 +126,7 @@ export class ApiService {
     }
 
     const headers = {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     };
     return this.http.get<{
       pizzas: Pizza[];
@@ -120,21 +139,23 @@ export class ApiService {
   // Order API
   createOrder(orderData: CreateOrderData): Observable<Order> {
     const headers = {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     };
-    return this.http.post<Order>(`${this.apiUrl}/orders`, orderData, { headers });
+    return this.http.post<Order>(`${this.apiUrl}/orders`, orderData, {
+      headers,
+    });
   }
 
   getUserOrders(): Observable<Order[]> {
     const headers = {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     };
     return this.http.get<Order[]>(`${this.apiUrl}/orders/mine`, { headers });
   }
 
   getAllOrders(): Observable<Order[]> {
     const headers = {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     };
     return this.http.get<Order[]>(`${this.apiUrl}/admin/orders`, { headers });
   }
@@ -142,23 +163,38 @@ export class ApiService {
   // Admin API
   confirmOrder(orderId: string): Observable<Order> {
     const headers = {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     };
-    return this.http.patch<Order>(`${this.apiUrl}/admin/orders/${orderId}/confirm`, {}, { headers });
+    return this.http.patch<Order>(
+      `${this.apiUrl}/admin/orders/${orderId}/confirm`,
+      {},
+      { headers }
+    );
   }
 
-  updateOrderStatus(orderId: string, status: Order['status']): Observable<Order> {
+  updateOrderStatus(
+    orderId: string,
+    status: Order['status']
+  ): Observable<Order> {
     const headers = {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     };
-    return this.http.patch<Order>(`${this.apiUrl}/admin/orders/${orderId}/status`, { status }, { headers });
+    return this.http.patch<Order>(
+      `${this.apiUrl}/admin/orders/${orderId}/status`,
+      { status },
+      { headers }
+    );
   }
 
   // Complaint API
   submitComplaint(orderId: string, complaintData: any): Observable<any> {
     const headers = {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     };
-    return this.http.post(`${this.apiUrl}/orders/${orderId}/complaint`, complaintData, { headers });
+    return this.http.post(
+      `${this.apiUrl}/orders/${orderId}/complaint`,
+      complaintData,
+      { headers }
+    );
   }
 }
