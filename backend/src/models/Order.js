@@ -3,23 +3,45 @@ const mongoose = require("mongoose");
 const orderSchema = new mongoose.Schema(
   {
     // TODO: Add user field - ObjectId reference to User model (required)
-    
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    items: {
+      type: Array,
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: ["pending", "confirmed", "preparing", "out_for_delivery", "delivered", "cancelled"],
+      default: "pending",
+    },
+    deliveryAddress: {
+      type: String,
+      required: true,
+    },
+    totalAmount: {
+      type: Number,
+      required: true,
+    },
+
     // TODO: Add items field - Array of mixed type objects containing:
     // - id (Pizza ID)
-    // - name (Pizza name) 
+    // - name (Pizza name)
     // - price (Pizza price)
     // - quantity (Quantity ordered)
-    
+
     // TODO: Add status field - String enum with values:
     // - "pending" (default)
     // - "confirmed"
-    // - "preparing" 
+    // - "preparing"
     // - "out_for_delivery"
     // - "delivered"
     // - "cancelled"
-    
+
     // TODO: Add deliveryAddress field - String (required)
-    
+
     // TODO: Add totalAmount field - Number (required)
   },
   {

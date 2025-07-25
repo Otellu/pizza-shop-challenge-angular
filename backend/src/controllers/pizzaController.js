@@ -2,6 +2,12 @@ const { Pizza } = require("../models");
 
 const getPizzas = async (req, res) => {
   try {
+    
+    if (Object.keys(req.query).length === 0) {
+      const pizzas = await Pizza.find();
+      return res.json(pizzas);
+    }
+
     const {
       filter,
       sortBy = 'createdAt',
