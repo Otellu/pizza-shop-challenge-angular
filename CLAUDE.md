@@ -91,3 +91,47 @@ The challenge involves implementing three main features:
 - Implement proper error handling and loading states
 - Use Mongoose virtuals and middleware for calculated fields
 - Follow RESTful API conventions for endpoints
+
+## Challenge Boilerplate Structure
+
+### **Feature Components Ready for Implementation:**
+
+**Feature 1: Pizza Discovery** 
+- `src/app/shared/pizza-list/pizza-list.component.ts` - Enhanced with detailed TODO structure
+- Time-allocated TODO comments with specific implementation guidance
+- State interface and helper methods provided
+- RxJS operators imported and ready to use
+
+**Feature 2: Admin Dashboard**
+- `src/app/pages/admin-dashboard/admin-dashboard.component.ts` - Real-time polling boilerplate
+- Comprehensive TODO structure for polling, tab visibility, status updates
+- Service injection and error handling patterns provided
+- Method stubs with detailed implementation examples
+
+**Feature 3: Order History + Complaints**
+- `src/app/pages/order-history/order-history.component.ts` - Complete reactive forms structure
+- Form interfaces and validation patterns ready
+- API integration stubs with proper error handling
+- Helper methods for form options and data formatting
+
+### **Supporting Infrastructure:**
+
+**TypeScript Interfaces:**
+- `src/app/shared/interfaces/challenge.interfaces.ts` - Comprehensive type definitions
+- Form validation interfaces and polling configuration types
+- API response types and error handling interfaces
+
+**Helper Components:**
+- `src/app/shared/modal/modal.component.ts` - Reusable modal for complaint forms
+- `src/app/shared/error-boundary/error-boundary.component.ts` - Error boundary component
+- Existing loader and toast components available
+
+**Testing Framework:**
+- `src/app/shared/pizza-list/pizza-list.component.spec.ts` - Comprehensive test example
+- Demonstrates testing patterns for RxJS, API integration, state management
+- TODO structure for candidates to implement their chosen feature test
+
+**API Service Enhancements:**
+- `submitComplaint()` method added for Feature 3
+- All backend endpoints properly typed and ready to use
+- Error handling patterns consistent across all methods

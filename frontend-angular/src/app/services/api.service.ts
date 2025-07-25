@@ -153,4 +153,12 @@ export class ApiService {
     };
     return this.http.patch<Order>(`${this.apiUrl}/admin/orders/${orderId}/status`, { status }, { headers });
   }
+
+  // Complaint API
+  submitComplaint(orderId: string, complaintData: any): Observable<any> {
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+    return this.http.post(`${this.apiUrl}/orders/${orderId}/complaint`, complaintData, { headers });
+  }
 }

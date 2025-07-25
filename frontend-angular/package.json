@@ -6,7 +6,14 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "test:watch": "ng test --watch",
+    "test:coverage": "ng test --code-coverage",
+    "test:objective": "ts-node src/app/tests/objective/test-runner.script.ts",
+    "test:evaluation": "npm run test:objective",
+    "test:evaluation:verbose": "npm run test:objective -- --verbose",
+    "test:evaluation:no-report": "npm run test:objective -- --no-report",
+    "lint": "ng lint"
   },
   "private": true,
   "dependencies": {
@@ -32,12 +39,14 @@
     "@angular/cli": "^18.2.20",
     "@angular/compiler-cli": "^18.2.0",
     "@types/jasmine": "~5.1.0",
+    "@types/node": "^18.7.0",
     "jasmine-core": "~5.2.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "ts-node": "^10.9.0",
     "typescript": "~5.5.2"
   }
 }
