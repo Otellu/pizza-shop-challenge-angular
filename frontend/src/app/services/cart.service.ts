@@ -7,7 +7,7 @@ export interface Pizza {
   price: number;
   imageUrl: string;
   image: string;
-  veg: boolean;
+  isVegetarian: boolean;
   ingredients: string[];
   available: boolean;
 }

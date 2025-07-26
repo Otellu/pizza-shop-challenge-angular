@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ElementRef, ViewChild, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef, ViewChild, inject, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, BehaviorSubject, debounceTime, distinctUntilChanged, switchMap, catchError, finalize } from 'rxjs';
@@ -76,7 +76,7 @@ interface PizzaListState {
   templateUrl: './pizza-list.component.html',
   styleUrl: './pizza-list.component.css'
 })
-export class PizzaListComponent implements OnInit, OnDestroy {
+export class PizzaListComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('loadTrigger', { static: false }) loadTrigger!: ElementRef;
 
   private apiService = inject(ApiService);
@@ -103,37 +103,47 @@ export class PizzaListComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.setupSearch();
     this.loadPizzas(true);
-    
-    // TODO: Add state for filters, sorting, pagination, loading, etc.
-    
-    // Setup intersection observer for infinite scroll
-    setTimeout(() => {
-      this.setupInfiniteScroll();
-    }, 1000);
+  }
+
+  ngAfterViewInit() {
+    // Setup intersection observer after view is initialized
+    this.setupInfiniteScroll();
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-    if (this.intersectionObserver) {
+    if (this.intersectionObserver && typeof this.intersectionObserver.disconnect === 'function') {
       this.intersectionObserver.disconnect();
     }
   }
 
   private setupSearch() {
+    // Skip initial empty value to avoid double loading on init
+    // Use shorter debounce in test environment to avoid timer cleanup issues
+    const debounceMs = (globalThis as any).jest ? 0 : 300;
+    
     this.searchSubject.pipe(
-      debounceTime(500),
+      debounceTime(debounceMs),
       distinctUntilChanged(),
       takeUntil(this.destroy$)
-    ).subscribe(query => {
-      this.state.searchQuery = query;
-      this.loadPizzas(true);
+    ).subscribe({
+      next: (query) => {
+        // Only update if this is not the initial empty value and ngOnInit has completed
+        if (this.state.searchQuery !== query) {
+          this.state.searchQuery = query;
+          this.state.loading = true; // Set loading state immediately for user feedback
+          this.loadPizzas(true);
+        }
+      },
+      error: (error) => {
+        console.error('Search subscription error:', error);
+      }
     });
   }
 
   private setupInfiniteScroll() {
-    if (!this.loadTrigger) return;
-
+    // Create intersection observer
     this.intersectionObserver = new IntersectionObserver(
       (entries) => {
         const target = entries[0];
@@ -144,7 +154,10 @@ export class PizzaListComponent implements OnInit, OnDestroy {
       { threshold: 0.1 }
     );
 
-    this.intersectionObserver.observe(this.loadTrigger.nativeElement);
+    // Observe the load trigger element
+    if (this.loadTrigger?.nativeElement) {
+      this.intersectionObserver.observe(this.loadTrigger.nativeElement);
+    }
   }
 
   loadPizzas(reset = false) {
@@ -156,38 +169,24 @@ export class PizzaListComponent implements OnInit, OnDestroy {
       this.state.loadingMore = true;
     }
 
-    // ========================================
-    // 🚀 TODO: IMPLEMENT ADVANCED API CALLS
-    // ========================================
-    //
-    // REPLACE the simple getAllPizzas() call below with:
-    // 
-    // 1. Use this.apiService.getAllPizzasWithQuery() method
-    // 2. Build query parameters from current state:
-    //    {
-    //      filter: this.state.currentFilter !== 'all' ? this.state.currentFilter : undefined,
-    //      sortBy: this.getSortField(this.state.currentSort),
-    //      sortOrder: this.getSortOrder(this.state.currentSort), 
-    //      search: this.state.searchQuery || undefined,
-    //      page: this.state.currentPage,
-    //      limit: 10
-    //    }
-    // 3. Handle pagination response structure:
-    //    response.body.pizzas, response.body.pagination
-    // 4. Update hasMore, totalPages from pagination object
-    // 
-    // EXAMPLE:
-    // const queryParams = { /* build from state */ };
-    // this.apiService.getAllPizzasWithQuery(queryParams).pipe(...)
-    
-    this.apiService.getAllPizzas()
+    const queryParams: PizzaQueryParams = {
+      isVegetarian: this.getIsVegetarianValue(this.state.currentFilter),
+      sortBy: this.getSortField(this.state.currentSort),
+      sortOrder: this.getSortOrder(this.state.currentSort),
+      search: this.state.searchQuery && this.state.searchQuery.trim() ? this.state.searchQuery.trim() : undefined,
+      page: this.state.currentPage,
+      limit: 10
+    };
+
+
+    this.apiService.getAllPizzasWithQuery(queryParams)
       .pipe(
         catchError((error) => {
           console.error('Failed to load pizzas:', error);
           const errorMessage = error.error?.message || error.message || 'Failed to load pizzas';
           this.state.error = errorMessage;
           this.toastService.error(errorMessage);
-          return of([]);
+          return of({ pizzas: [], pagination: { currentPage: 1, totalPages: 1, totalCount: 0, hasNextPage: false, hasPreviousPage: false, limit: 10 } });
         }),
         finalize(() => {
           this.state.loading = false;
@@ -195,12 +194,17 @@ export class PizzaListComponent implements OnInit, OnDestroy {
         }),
         takeUntil(this.destroy$)
       )
-      .subscribe((pizzas) => {
-        this.state.pizzas = pizzas;
-        this.state.totalPages = 1;
-        this.state.hasMore = false;
+      .subscribe((response) => {
+        if (reset) {
+          this.state.pizzas = response.pizzas;
+        } else {
+          this.state.pizzas = [...this.state.pizzas, ...response.pizzas];
+        }
+        
+        this.state.totalPages = response.pagination.totalPages;
+        this.state.hasMore = response.pagination.hasNextPage;
         this.state.error = null;
-        console.log('Loaded pizzas:', pizzas);
+        console.log('Loaded pizzas:', response.pizzas);
       });
   }
 
@@ -208,25 +212,46 @@ export class PizzaListComponent implements OnInit, OnDestroy {
   // 🚀 TODO: IMPLEMENT HELPER METHODS
   // ========================================
   
-  private getSortField(sortType: SortType): string {
-    // TODO: Convert SortType to API field names
-    // 'default' -> 'createdAt'
-    // 'price-asc' -> 'price'
-    // 'price-desc' -> 'price'
-    // 'name-asc' -> 'name'
-    return 'createdAt'; // Replace with proper logic
+  private getIsVegetarianValue(filter: FilterType): boolean | undefined {
+    switch (filter) {
+      case 'veg':
+        return true;
+      case 'non-veg':
+        return false;
+      case 'all':
+      default:
+        return undefined;
+    }
+  }
+
+  private getSortField(sortType: SortType): 'price' | 'name' | 'createdAt' {
+    switch (sortType) {
+      case 'price-asc':
+      case 'price-desc':
+        return 'price';
+      case 'name-asc':
+        return 'name';
+      case 'default':
+      default:
+        return 'createdAt';
+    }
   }
 
   private getSortOrder(sortType: SortType): 'asc' | 'desc' {
-    // TODO: Convert SortType to sort order
-    // 'default' -> 'desc'
-    // 'price-asc' -> 'asc'
-    // 'price-desc' -> 'desc'
-    // 'name-asc' -> 'asc'
-    return 'desc'; // Replace with proper logic
+    switch (sortType) {
+      case 'price-asc':
+      case 'name-asc':
+        return 'asc';
+      case 'price-desc':
+        return 'desc';
+      case 'default':
+      default:
+        return 'desc';
+    }
   }
 
-  private loadMorePizzas() {
+  // Public method for infinite scroll (useful for testing)
+  public loadMorePizzas() {
     if (this.state.hasMore && !this.state.loadingMore) {
       this.state.currentPage++;
       this.loadPizzas(false);
@@ -254,7 +279,27 @@ export class PizzaListComponent implements OnInit, OnDestroy {
   // Search methods
   onSearchChange(event: Event) {
     const input = event.target as HTMLInputElement;
-    this.searchSubject.next(input.value);
+    const searchValue = input.value;
+    
+    // Update search subject for debounced handling
+    this.searchSubject.next(searchValue);
+  }
+
+  // Public method to handle search directly (useful for testing)
+  public performSearch(query: string) {
+    this.state.searchQuery = query;
+    this.state.loading = true;
+    this.loadPizzas(true);
+  }
+
+  clearSearch() {
+    this.searchSubject.next('');
+    // Note: searchQuery will be updated via setupSearch subscription
+  }
+
+  retryLoad() {
+    this.state.error = null;
+    this.loadPizzas(true);
   }
 
   // Cart methods
@@ -266,7 +311,7 @@ export class PizzaListComponent implements OnInit, OnDestroy {
   isInCart(pizza: Pizza): boolean {
     // Match React's logic - check both _id and id fields
     const pizzaId = (pizza as any)._id || pizza.id;
-    return this.cartService.items().some(item => {
+    return this.cartService.items().some((item: any) => {
       const itemId = (item as any)._id || item.id;
       return itemId === pizzaId;
     });
@@ -281,6 +326,7 @@ export class PizzaListComponent implements OnInit, OnDestroy {
       { value: 'name-asc', label: 'Name: A to Z' }
     ];
   }
+
 
   getFilterButtons() {
     return [

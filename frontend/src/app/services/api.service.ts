@@ -24,8 +24,10 @@ export interface LoginResponse {
 }
 
 export interface OrderItem {
-  pizza: Pizza;
-  size: string;
+  id?: string;
+  name?: string;
+  pizza?: Pizza;
+  size?: string;
   quantity: number;
   price: number;
 }
@@ -48,7 +50,8 @@ export interface Order {
     | 'confirmed'
     | 'preparing'
     | 'out_for_delivery'
-    | 'delivered';
+    | 'delivered'
+    | 'cancelled';
   createdAt: string;
   updatedAt: string;
 }
@@ -56,12 +59,13 @@ export interface Order {
 export interface CreateOrderData {
   items: Pizza[];
   deliveryAddress: string;
-  totalAmount: number;
 }
 
 export interface PizzaQueryParams {
-  filter?: 'veg' | 'non-veg' | 'all';
+  isVegetarian?: boolean;
+  sortBy?: 'price' | 'name' | 'createdAt';
   sortOrder?: 'asc' | 'desc';
+  search?: string;
   page?: number;
   limit?: number;
 }
@@ -106,17 +110,28 @@ export class ApiService {
 
   getAllPizzasWithQuery(queryParams: PizzaQueryParams): Observable<{
     pizzas: Pizza[];
-    total: number;
-    page: number;
-    totalPages: number;
+    pagination: {
+      currentPage: number;
+      totalPages: number;
+      totalCount: number;
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
+      limit: number;
+    };
   }> {
     let params = new HttpParams();
 
-    if (queryParams.filter) {
-      params = params.append('filter', queryParams.filter);
+    if (queryParams.isVegetarian !== undefined) {
+      params = params.append('isVegetarian', queryParams.isVegetarian.toString());
+    }
+    if (queryParams.sortBy) {
+      params = params.append('sortBy', queryParams.sortBy);
     }
     if (queryParams.sortOrder) {
       params = params.append('sortOrder', queryParams.sortOrder);
+    }
+    if (queryParams.search) {
+      params = params.append('search', queryParams.search);
     }
     if (queryParams.page) {
       params = params.append('page', queryParams.page.toString());
@@ -130,9 +145,14 @@ export class ApiService {
     };
     return this.http.get<{
       pizzas: Pizza[];
-      total: number;
-      page: number;
-      totalPages: number;
+      pagination: {
+        currentPage: number;
+        totalPages: number;
+        totalCount: number;
+        hasNextPage: boolean;
+        hasPreviousPage: boolean;
+        limit: number;
+      };
     }>(`${this.apiUrl}/pizzas`, { params, headers });
   }
 
@@ -187,7 +207,12 @@ export class ApiService {
   }
 
   // Complaint API
-  submitComplaint(orderId: string, complaintData: any): Observable<any> {
+  submitComplaint(orderId: string, complaintData: {
+    complaintType: string;
+    description: string;
+    email?: string;
+    phone?: string;
+  }): Observable<any> {
     const headers = {
       'Content-Type': 'application/json',
     };

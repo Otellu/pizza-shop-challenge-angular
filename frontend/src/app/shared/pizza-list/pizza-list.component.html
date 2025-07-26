@@ -1,28 +1,42 @@
 <div class="mx-auto">
-  <!-- TODO: CANDIDATE TASK - Make these controls interactive -->
-  <!-- Current controls are static - you need to:
-       1. Connect filter buttons to state
-       2. Connect sort dropdown to state
-       3. Trigger API calls on filter/sort changes
-       4. Add loading states during API calls
-  -->
+  <!-- Search Input -->
+  <div class="mb-4">
+    <div class="relative">
+      <input
+        type="text"
+        placeholder="Search pizzas..."
+        class="w-full px-4 py-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+        [value]="state.searchQuery"
+        (input)="onSearchChange($event)"
+        data-testid="search-input"
+      />
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter and Sort Controls -->
   <div class="flex justify-between mb-6 gap-4 flex-wrap items-center">
     <div class="flex gap-2 mb-2 sm:mb-0">
-      <!-- TODO: Make filter buttons interactive -->
       <app-filter-button
         *ngFor="let filter of getFilterButtons()"
         [text]="filter.text"
         [active]="filter.active"
+        [testId]="'filter-' + filter.key"
         (click)="onFilterChange(filter.key)"
       ></app-filter-button>
     </div>
 
     <div class="ml-4">
-      <!-- TODO: Make sort dropdown interactive -->
       <select
-        class="px-4 py-2 rounded-full border font-semibold text-gray-700 bg-white shadow focus:outline-none cursor-default"
+        class="px-4 py-2 rounded-full border font-semibold text-gray-700 bg-white shadow focus:outline-none cursor-pointer"
         [value]="state.currentSort"
         (change)="onSortChange($event)"
+        data-testid="sort-select"
+        aria-label="Sort by"
       >
         <option *ngFor="let option of getSortOptions()" [value]="option.value">
           {{ option.label }}
@@ -32,15 +46,16 @@
   </div>
 
   <!-- Loading State -->
-  <div *ngIf="state.loading" class="flex justify-center py-12">
+  <div *ngIf="state.loading" class="flex justify-center py-12" data-testid="loading-spinner">
     <app-loader></app-loader>
   </div>
 
   <!-- Pizza Grid -->
-  <div *ngIf="!state.loading && state.pizzas.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+  <div *ngIf="!state.loading && state.pizzas.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6" data-testid="pizza-list-container">
     <div
       *ngFor="let pizza of state.pizzas; trackBy: trackByPizzaId"
       class="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col hover:scale-[1.03] transition-transform"
+      data-testid="pizza-card"
     >
       <div class="relative w-full h-40">
         <img
@@ -51,15 +66,15 @@
         />
         <!-- Veg/Non-Veg Icon Overlay -->
         <span
-          *ngIf="pizza.veg"
-          title="Veg"
+          *ngIf="pizza.isVegetarian"
+          title="Vegetarian"
           class="absolute top-2 left-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow"
         >
           <span class="block w-3 h-3 bg-green-600 rounded-full border-2 border-green-800"></span>
         </span>
         <span
-          *ngIf="!pizza.veg"
-          title="Non-Veg"
+          *ngIf="!pizza.isVegetarian"
+          title="Non-Vegetarian"
           class="absolute top-2 left-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow"
         >
           <span class="block w-3 h-3 bg-red-600 rounded-full border-2 border-red-800"></span>
@@ -83,6 +98,7 @@
             *ngIf="isInCart(pizza)"
             class="px-4 py-2 bg-gray-300 text-gray-500 rounded-full font-semibold cursor-not-allowed"
             disabled
+            data-testid="in-cart-button"
           >
             In Cart
           </button>
@@ -90,6 +106,7 @@
             *ngIf="!isInCart(pizza)"
             class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-full font-semibold shadow"
             (click)="addToCart(pizza)"
+            data-testid="add-to-cart-button"
           >
             Add to Cart
           </button>
@@ -98,29 +115,46 @@
     </div>
   </div>
 
-  <!-- TODO: Add loading state for infinite scroll -->
-  <!-- *ngIf="loading" 
-    <div class="flex justify-center py-8">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
-    </div>
-  -->
+  <!-- Infinite Scroll Loading -->
+  <div *ngIf="state.loadingMore" class="flex justify-center py-8" data-testid="loading-more">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+  </div>
 
-  <!-- TODO: Add "no more results" message -->
-  <!-- *ngIf="!hasMore && pizzas.length > 0"
-    <div class="text-center py-8 text-gray-500">
-      No more pizzas to load
-    </div>
-  -->
+  <!-- Load Trigger for Infinite Scroll -->
+  <div #loadTrigger class="h-10"></div>
 
-  <!-- TODO: Add empty state -->
-  <!-- *ngIf="!loading && pizzas.length === 0"
-    <div class="text-center py-8 text-gray-500">
-      No pizzas found
-    </div>
-  -->
+  <!-- No More Results -->
+  <div *ngIf="!state.hasMore && state.pizzas.length > 0 && !state.loading" class="text-center py-8 text-gray-500" data-testid="no-more-items">
+    <p class="text-lg font-medium">🍕 You've seen all our delicious pizzas!</p>
+    <p class="text-sm mt-2">Try adjusting your filters to discover more options.</p>
+  </div>
 
   <!-- Empty State -->
-  <div *ngIf="!state.loading && state.pizzas.length === 0" class="text-center py-8 text-gray-500">
-    No pizzas found
+  <div *ngIf="!state.loading && state.pizzas.length === 0" class="text-center py-12" data-testid="no-results">
+    <h3 class="text-xl font-medium text-gray-900 mb-2">No pizzas found</h3>
+    <p class="text-gray-500 mb-4">
+      {{ state.searchQuery ? 'Try searching for something else' : 'Try adjusting your filters' }}
+    </p>
+    <button
+      *ngIf="state.searchQuery || state.currentFilter !== 'all' || state.currentSort !== 'default'"
+      class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors"
+      (click)="clearFilters()"
+      data-testid="clear-filters-button"
+    >
+      Clear Filters
+    </button>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="state.error && !state.loading" class="text-center py-12" data-testid="error-message">
+    <h3 class="text-xl font-medium text-gray-900 mb-2">Oops! Something went wrong</h3>
+    <p class="text-gray-500 mb-4">{{ state.error }}</p>
+    <button
+      class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors"
+      (click)="loadPizzas(true)"
+      data-testid="retry-button"
+    >
+      Try Again
+    </button>
   </div>
 </div>

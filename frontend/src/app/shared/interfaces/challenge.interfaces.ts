@@ -7,7 +7,7 @@
 
 // Feature 1: Pizza Discovery Interfaces
 export interface PizzaQueryParams {
-  filter?: 'veg' | 'non-veg';
+  isVegetarian?: boolean;
   sortBy?: 'price' | 'name' | 'createdAt';
   sortOrder?: 'asc' | 'desc';
   search?: string;
@@ -64,8 +64,8 @@ export interface AdminDashboardState {
 export interface ComplaintFormData {
   complaintType: 'Quality Issue' | 'Delivery Problem' | 'Wrong Order' | 'Other';
   description: string;
-  priority: 'low' | 'medium' | 'high';
-  contactPreference: string[]; // ['email', 'phone']
+  email?: string; // Optional, with email validation when provided
+  phone?: string; // Optional, with India phone number validation (+91 format) when provided
 }
 
 export interface ComplaintFormState {

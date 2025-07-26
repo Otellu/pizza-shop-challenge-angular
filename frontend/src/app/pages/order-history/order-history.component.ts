@@ -1,6 +1,13 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray, AbstractControl } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+  FormArray,
+  AbstractControl,
+} from '@angular/forms';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -51,8 +58,8 @@ import { LoaderComponent } from '../../shared/loader/loader.component';
 interface ComplaintForm {
   complaintType: 'Quality Issue' | 'Delivery Problem' | 'Wrong Order' | 'Other';
   description: string;
-  priority: 'low' | 'medium' | 'high';
-  contactPreference: string[]; // ['email', 'phone']
+  email?: string; // Optional, with email validation when provided
+  phone?: string; // Optional, with India phone number validation (+91 format) when provided
 }
 
 @Component({
@@ -60,7 +67,7 @@ interface ComplaintForm {
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, LoaderComponent],
   templateUrl: './order-history.component.html',
-  styleUrl: './order-history.component.css'
+  styleUrl: './order-history.component.css',
 })
 export class OrderHistoryComponent implements OnInit, OnDestroy {
   private apiService = inject(ApiService);
@@ -77,23 +84,33 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
   showComplaintForm = false;
   submittingComplaint = false;
 
+  // Static arrays for form options
+  complaintTypes = [
+    { value: 'Quality Issue', label: 'Quality Issue' },
+    { value: 'Delivery Problem', label: 'Delivery Problem' },
+    { value: 'Wrong Order', label: 'Wrong Order' },
+    { value: 'Other', label: 'Other' },
+  ];
+
+
   // ========================================
   // 🚀 TODO: CREATE REACTIVE FORM
   // ========================================
   complaintForm: FormGroup;
 
   constructor() {
-    // Initialize basic form structure (candidates will add custom validation)
+    // Initialize reactive form with custom validation
     this.complaintForm = this.formBuilder.group({
       complaintType: ['', Validators.required],
-      description: ['', Validators.required], // TODO: Add custom minLength validator
-      priority: ['', Validators.required],
-      contactPreference: this.formBuilder.array([])
-    });
+      description: ['', [Validators.required, this.minLengthValidator(20)]],
+      email: ['', this.emailValidator],
+      phone: ['', this.indiaPhoneValidator],
+    }, { validators: this.atLeastOneContactValidator });
   }
 
   ngOnInit() {
     this.loadUserOrders();
+    console.log('Component initialized - complaintTypes:', this.complaintTypes);
   }
 
   ngOnDestroy() {
@@ -104,10 +121,11 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
   // ========================================
   // 🚀 TODO: IMPLEMENT ORDER LOADING
   // ========================================
-  
+
   private loadUserOrders() {
     this.loadingOrders = true;
-    this.apiService.getUserOrders()
+    this.apiService
+      .getUserOrders()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (orders) => {
@@ -117,7 +135,7 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
         error: (error) => {
           this.toastService.error('Failed to load order history');
           this.loadingOrders = false;
-        }
+        },
       });
   }
 
@@ -126,9 +144,12 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
   // ========================================
 
   openComplaintForm(orderId: string) {
+    console.log('Opening complaint form for order:', orderId);
     this.selectedOrderId = orderId;
     this.showComplaintForm = true;
     this.resetComplaintForm();
+    console.log('Form state:', this.complaintForm.value);
+    console.log('Show form:', this.showComplaintForm);
   }
 
   closeComplaintForm() {
@@ -138,32 +159,54 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
   }
 
   submitComplaint() {
-    // ========================================
-    // 🚀 TODO: IMPLEMENT COMPLAINT SUBMISSION
-    // ========================================
-    //
-    // 1. Validate the form
-    // 2. Get form values and orderId
-    // 3. Set submitting state
-    // 4. Call API: this.apiService.submitComplaint(orderId, complaintData)
-    // 5. Handle success: show toast, close form, refresh orders
-    // 6. Handle error: show error toast, keep form open
-    //
-    // EXAMPLE:
-    // if (this.complaintForm.valid && this.selectedOrderId) {
-    //   this.submittingComplaint = true;
-    //   const complaintData = this.complaintForm.value;
-    //   
-    //   // Make API call here
-    //   // Handle response
-    // }
+    if (this.complaintForm.valid && this.selectedOrderId) {
+      this.submittingComplaint = true;
+
+      const formValue = this.complaintForm.value;
+
+      const complaintData: ComplaintForm = {
+        complaintType: formValue.complaintType,
+        description: formValue.description,
+      };
+      
+      // Only include email/phone if they have values
+      if (formValue.email && formValue.email.trim()) {
+        complaintData.email = formValue.email.trim();
+      }
+      if (formValue.phone && formValue.phone.trim()) {
+        complaintData.phone = formValue.phone.trim();
+      }
+
+      this.apiService
+        .submitComplaint(this.selectedOrderId, complaintData)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (response) => {
+            this.submittingComplaint = false;
+            this.toastService.success(
+              'Complaint submitted successfully! We will review it shortly.'
+            );
+            this.closeComplaintForm();
+            this.loadUserOrders(); // Refresh orders to show complaint status
+          },
+          error: (error) => {
+            this.submittingComplaint = false;
+            const errorMessage =
+              error.error?.message ||
+              'Failed to submit complaint. Please try again.';
+            this.toastService.error(errorMessage);
+            console.error('Complaint submission error:', error);
+          },
+        });
+    } else {
+      // Mark all fields as touched to show validation errors
+      this.markFormGroupTouched(this.complaintForm);
+    }
   }
 
   private resetComplaintForm() {
     this.complaintForm.reset();
-    // Clear contact preference checkboxes
-    const contactArray = this.complaintForm.get('contactPreference') as FormArray;
-    contactArray.clear();
+    console.log('Form reset');
   }
 
   // ========================================
@@ -171,43 +214,53 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
   // ========================================
 
   private minLengthValidator(minLength: number) {
-    // TODO: Create custom validator for minimum length
-    // return (control: AbstractControl) => {
-    //   if (!control.value || control.value.length >= minLength) {
-    //     return null;
-    //   }
-    //   return { minLength: { requiredLength: minLength, actualLength: control.value.length } };
-    // };
-    return null; // Temporary return
+    return (control: AbstractControl) => {
+      if (!control.value || control.value.length >= minLength) {
+        return null;
+      }
+      return {
+        minLength: {
+          requiredLength: minLength,
+          actualLength: control.value.length,
+        },
+      };
+    };
+  }
+
+  private emailValidator(control: AbstractControl) {
+    if (!control.value) {
+      return null;
+    }
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const valid = emailRegex.test(control.value);
+    return valid ? null : { email: { value: control.value } };
+  }
+
+  private indiaPhoneValidator(control: AbstractControl) {
+    if (!control.value) {
+      return null;
+    }
+    // India phone number validation: +91 followed by 10 digits
+    const phoneRegex = /^\+91[6-9]\d{9}$/;
+    const valid = phoneRegex.test(control.value);
+    return valid ? null : { indiaPhone: { value: control.value } };
+  }
+
+  private atLeastOneContactValidator(group: AbstractControl) {
+    const email = group.get('email')?.value;
+    const phone = group.get('phone')?.value;
+    
+    // At least one contact method must be provided
+    if (!email && !phone) {
+      return { atLeastOneContact: true };
+    }
+    
+    return null;
   }
 
   // ========================================
   // 🚀 TODO: ADD HELPER METHODS
   // ========================================
-
-  getComplaintTypes() {
-    return [
-      { value: 'Quality Issue', label: 'Quality Issue' },
-      { value: 'Delivery Problem', label: 'Delivery Problem' },
-      { value: 'Wrong Order', label: 'Wrong Order' },
-      { value: 'Other', label: 'Other' }
-    ];
-  }
-
-  getPriorityOptions() {
-    return [
-      { value: 'low', label: 'Low' },
-      { value: 'medium', label: 'Medium' },
-      { value: 'high', label: 'High' }
-    ];
-  }
-
-  getContactOptions() {
-    return [
-      { value: 'email', label: 'Email' },
-      { value: 'phone', label: 'Phone' }
-    ];
-  }
 
   // Helper methods for template
   getOrderId(order: Order): string {
@@ -220,11 +273,85 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
 
   getStatusClass(status: string): string {
     switch (status) {
-      case 'delivered': return 'bg-green-100 text-green-800';
-      case 'preparing': return 'bg-yellow-100 text-yellow-800';
-      case 'out_for_delivery': return 'bg-blue-100 text-blue-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'delivered':
+        return 'bg-green-100 text-green-800';
+      case 'preparing':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'out_for_delivery':
+        return 'bg-blue-100 text-blue-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   }
+
+  // Form validation helpers
+  hasError(field: string, errorType: string): boolean {
+    const control = this.complaintForm.get(field);
+    
+    // Handle form-level errors
+    if (errorType === 'atLeastOneContact') {
+      return this.complaintForm.hasError('atLeastOneContact') && this.complaintForm.touched;
+    }
+    
+    return !!(
+      control &&
+      control.hasError(errorType) &&
+      (control.dirty || control.touched)
+    );
+  }
+  
+  hasContactError(): boolean {
+    return this.complaintForm.hasError('atLeastOneContact') && this.complaintForm.touched;
+  }
+
+  getErrorMessage(field: string): string {
+    const control = this.complaintForm.get(field);
+    if (control && control.errors && (control.dirty || control.touched)) {
+      if (control.errors['required']) {
+        return `${this.getFieldName(field)} is required`;
+      }
+      if (control.errors['minLength']) {
+        return `${this.getFieldName(field)} must be at least ${
+          control.errors['minLength'].requiredLength
+        } characters (current: ${control.errors['minLength'].actualLength})`;
+      }
+      if (control.errors['email']) {
+        return 'Please enter a valid email address';
+      }
+      if (control.errors['indiaPhone']) {
+        return 'Please enter a valid India phone number (+91xxxxxxxxxx)';
+      }
+    }
+    
+    // Check for form-level validation errors
+    if (this.complaintForm.hasError('atLeastOneContact') && this.complaintForm.touched) {
+      if (field === 'email' || field === 'phone') {
+        return 'Please provide at least one contact method (email or phone)';
+      }
+    }
+    return '';
+  }
+
+  private getFieldName(field: string): string {
+    const fieldNames: { [key: string]: string } = {
+      complaintType: 'Complaint type',
+      description: 'Description',
+      email: 'Email',
+      phone: 'Phone number',
+    };
+    return fieldNames[field] || field;
+  }
+
+  private markFormGroupTouched(formGroup: FormGroup) {
+    Object.keys(formGroup.controls).forEach((key) => {
+      const control = formGroup.get(key);
+      control?.markAsTouched();
+      if (control instanceof FormGroup) {
+        this.markFormGroupTouched(control);
+      }
+    });
+  }
+
 }

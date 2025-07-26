@@ -56,51 +56,28 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   private toastService = inject(ToastService);
   private destroy$ = new Subject<void>();
 
-  // ========================================
-  // 🚀 TODO: ADD REAL-TIME STATE MANAGEMENT
-  // ========================================
   orders: Order[] = [];
   loadingOrders = true;
+  updatingOrders: Set<string> = new Set();
   
-  // TODO: Add these properties for real-time functionality:
-  // private isPolling = false;
-  // private pollingInterval = 5000; // 5 seconds
-  // private isTabVisible = true;
+  // Real-time polling properties
+  private isPolling = false;
+  pollingInterval = 5000; // 5 seconds (public for template access)
+  private isTabVisible = true;
 
   ngOnInit() {
-    // ========================================
-    // 🚀 TODO: IMPLEMENT REAL-TIME POLLING
-    // ========================================
-    //
-    // REPLACE this basic fetchOrders() call with real-time polling:
-    //
-    // 1. Set up tab visibility listener:
-    //    document.addEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
-    //
-    // 2. Start real-time polling:
-    //    this.startPolling();
-    //
-    // 3. Set up the polling stream:
-    //    interval(this.pollingInterval)
-    //      .pipe(
-    //        startWith(0), // Trigger immediate load
-    //        switchMap(() => this.isTabVisible ? this.apiService.getAllOrders() : of(this.orders)),
-    //        catchError(error => { /* handle without breaking stream */ return of(this.orders); }),
-    //        takeUntil(this.destroy$)
-    //      )
-    //      .subscribe(orders => this.orders = orders);
+    // Set up tab visibility listener
+    document.addEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
     
-    this.fetchOrders();
+    // Start real-time polling
+    this.startPolling();
   }
 
   ngOnDestroy() {
-    // ========================================
-    // 🚀 TODO: CLEANUP SUBSCRIPTIONS
-    // ========================================
     this.destroy$.next();
     this.destroy$.complete();
-    // TODO: Remove visibility listener:
-    // document.removeEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
+    // Remove visibility listener
+    document.removeEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
   }
 
   async fetchOrders() {
@@ -120,66 +97,69 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   // ========================================
 
   private startPolling() {
-    // TODO: Implement real-time polling with RxJS
-    // Example:
-    // interval(this.pollingInterval)
-    //   .pipe(
-    //     startWith(0),
-    //     switchMap(() => this.loadOrders()),
-    //     takeUntil(this.destroy$)
-    //   )
-    //   .subscribe();
+    this.isPolling = true;
+    interval(this.pollingInterval)
+      .pipe(
+        startWith(0), // Trigger immediate load
+        switchMap(() => this.isTabVisible ? this.loadOrders() : of(this.orders)),
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        next: (orders) => {
+          this.orders = orders;
+          this.loadingOrders = false;
+        },
+        error: (error) => {
+          console.error('Polling error:', error);
+          this.loadingOrders = false;
+        }
+      });
   }
 
   private loadOrders() {
-    // TODO: Convert fetchOrders to return Observable instead of Promise
-    // return this.apiService.getAllOrders().pipe(
-    //   catchError(error => {
-    //     console.error('Polling error:', error);
-    //     return of(this.orders); // Return current orders on error
-    //   })
-    // );
+    return this.apiService.getAllOrders().pipe(
+      catchError(error => {
+        console.error('Polling error:', error);
+        return of(this.orders); // Return current orders on error
+      })
+    );
   }
 
   private handleVisibilityChange() {
-    // TODO: Handle tab visibility changes
-    // this.isTabVisible = document.visibilityState === 'visible';
-    // if (this.isTabVisible) {
-    //   // Immediately fetch fresh data when tab becomes visible
-    //   this.fetchOrders();
-    // }
+    this.isTabVisible = document.visibilityState === 'visible';
+    if (this.isTabVisible) {
+      // Immediately fetch fresh data when tab becomes visible
+      this.loadOrders().pipe(takeUntil(this.destroy$)).subscribe(orders => {
+        this.orders = orders;
+      });
+    }
   }
 
   updateOrderStatus(orderId: string, newStatus: Order['status']) {
-    // ========================================
-    // 🚀 TODO: IMPLEMENT STATUS UPDATES
-    // ========================================
-    //
-    // 1. Find the order in the local array
-    // 2. Store the original status for rollback
-    // 3. Optimistically update the UI
-    // 4. Call this.apiService.updateOrderStatus(orderId, newStatus)
-    // 5. On success: show success toast
-    // 6. On error: rollback the status and show error toast
-    //
-    // EXAMPLE:
-    // const order = this.orders.find(o => o.id === orderId);
-    // if (!order) return;
-    // 
-    // const originalStatus = order.status;
-    // order.status = newStatus; // Optimistic update
-    // 
-    // this.apiService.updateOrderStatus(orderId, newStatus)
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe({
-    //     next: (updatedOrder) => {
-    //       this.toastService.success(`Order status updated to ${newStatus}`);
-    //     },
-    //     error: (error) => {
-    //       order.status = originalStatus; // Rollback
-    //       this.toastService.error('Failed to update order status');
-    //     }
-    //   });
+    const order = this.orders.find(o => o.id === orderId);
+    if (!order) return;
+    
+    // Add to updating set to show loading state
+    this.updatingOrders.add(orderId);
+    const originalStatus = order.status;
+    
+    // Optimistic update
+    order.status = newStatus;
+    
+    this.apiService.updateOrderStatus(orderId, newStatus)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (updatedOrder) => {
+          this.updatingOrders.delete(orderId);
+          this.toastService.success(`Order status updated to ${this.getStatusText(newStatus)}`);
+        },
+        error: (error) => {
+          this.updatingOrders.delete(orderId);
+          order.status = originalStatus; // Rollback
+          this.toastService.error('Failed to update order status');
+          console.error('Update error:', error);
+        }
+      });
   }
 
   get totalOrders() {
@@ -229,13 +209,42 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     return new Date(dateString).toLocaleTimeString();
   }
 
-  async confirmOrder(order: Order) {
-    try {
-      await this.apiService.confirmOrder(order.id).toPromise();
-      this.toastService.success('Order confirmed successfully');
-      this.fetchOrders(); // Refresh the orders list
-    } catch (error) {
-      this.toastService.error('Failed to confirm order');
-    }
+  isOrderUpdating(orderId: string): boolean {
+    return this.updatingOrders.has(orderId);
+  }
+
+  getAvailableStatusTransitions(currentStatus: Order['status']): Order['status'][] {
+    const transitions: Record<Order['status'], Order['status'][]> = {
+      'pending': ['confirmed', 'cancelled'],
+      'confirmed': ['preparing', 'cancelled'],
+      'preparing': ['out_for_delivery', 'cancelled'],
+      'out_for_delivery': ['delivered'],
+      'delivered': [],
+      'cancelled': []
+    };
+    return transitions[currentStatus] || [];
+  }
+
+  confirmOrder(order: Order) {
+    this.updatingOrders.add(order.id);
+    const originalStatus = order.status;
+    
+    // Optimistic update
+    order.status = 'confirmed';
+    
+    this.apiService.confirmOrder(order.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (updatedOrder) => {
+          this.updatingOrders.delete(order.id);
+          this.toastService.success('Order confirmed successfully');
+        },
+        error: (error) => {
+          this.updatingOrders.delete(order.id);
+          order.status = originalStatus; // Rollback
+          this.toastService.error('Failed to confirm order');
+          console.error('Confirm error:', error);
+        }
+      });
   }
 }

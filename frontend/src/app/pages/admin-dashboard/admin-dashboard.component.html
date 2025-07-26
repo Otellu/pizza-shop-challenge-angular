@@ -23,7 +23,13 @@
 
   <!-- Orders Table -->
   <div class="bg-white rounded-xl shadow mb-8 p-4 overflow-x-auto">
-    <h2 class="text-xl font-semibold mb-4">All Orders</h2>
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-semibold">All Orders</h2>
+      <div class="flex items-center text-sm text-gray-500">
+        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2"></div>
+        Live Updates Every {{ pollingInterval / 1000 }}s
+      </div>
+    </div>
     
     <div *ngIf="loadingOrders" class="text-center py-8">
       <app-loader></app-loader>
@@ -81,16 +87,42 @@
             </span>
           </td>
           <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-            <button class="text-red-600 hover:text-red-900 mr-2">
-              View
-            </button>
-            <button 
-              *ngIf="order.status === 'pending'" 
-              class="text-green-600 hover:text-green-900"
-              (click)="confirmOrder(order)"
-            >
-              Confirm
-            </button>
+            <!-- Loading state for updating orders -->
+            <div *ngIf="isOrderUpdating(order.id)" class="flex items-center">
+              <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600 mr-2"></div>
+              <span class="text-gray-500">Updating...</span>
+            </div>
+            
+            <!-- Action buttons when not updating -->
+            <div *ngIf="!isOrderUpdating(order.id)" class="flex flex-wrap gap-1">
+              <!-- Quick confirm button for pending orders -->
+              <button 
+                *ngIf="order.status === 'pending'" 
+                class="px-2 py-1 bg-green-500 hover:bg-green-600 text-white rounded text-xs font-medium transition-colors"
+                (click)="confirmOrder(order)"
+                title="Quick Confirm"
+              >
+                Confirm
+              </button>
+              
+              <!-- Status transition buttons -->
+              <button 
+                *ngFor="let newStatus of getAvailableStatusTransitions(order.status)"
+                class="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-xs font-medium transition-colors mr-1 mb-1"
+                (click)="updateOrderStatus(order.id, newStatus)"
+                [title]="'Update to ' + getStatusText(newStatus)"
+              >
+                {{ getStatusText(newStatus) }}
+              </button>
+              
+              <!-- View button -->
+              <button 
+                class="px-2 py-1 bg-gray-500 hover:bg-gray-600 text-white rounded text-xs font-medium transition-colors"
+                title="View Details"
+              >
+                View
+              </button>
+            </div>
           </td>
         </tr>
       </tbody>
