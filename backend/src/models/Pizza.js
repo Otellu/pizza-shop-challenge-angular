@@ -6,7 +6,7 @@ const pizzaSchema = new mongoose.Schema({
   price: Number,
   available: Boolean,
   image: String,
-  veg: Boolean // true for veg, false for non-veg
+  isVegetarian: Boolean // true for vegetarian, false for non-vegetarian
 });
 
 module.exports = mongoose.model('Pizza', pizzaSchema);

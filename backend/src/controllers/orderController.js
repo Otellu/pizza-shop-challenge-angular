@@ -48,27 +48,45 @@ const getOrderById = async (req, res) => {
 
 const createOrder = async (req, res) => {
   try {
-    const { items, deliveryAddress, totalAmount } = req.body;
+    console.log('=== CREATE ORDER DEBUG ===');
+    console.log('Request body:', req.body);
+    console.log('Request user:', req.user);
+    console.log('User ID:', req.user?._id);
+    
+    const { items, deliveryAddress } = req.body;
 
-    if (!items || !deliveryAddress || !totalAmount) {
-      return res.status(400).json({ message: "Missing required fields" });
+    if (!items || !deliveryAddress) {
+      console.log('Missing required fields:', { items: !!items, deliveryAddress: !!deliveryAddress });
+      return res.status(400).json({ message: "Missing required fields: items and deliveryAddress" });
     }
 
-    const order = new Order({
+    if (!Array.isArray(items) || items.length === 0) {
+      console.log('Invalid or empty items array');
+      return res.status(400).json({ message: "Items must be a non-empty array" });
+    }
+
+    if (!req.user || !req.user._id) {
+      console.log('No authenticated user found');
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    const orderData = {
       user: req.user._id,
       items,
       deliveryAddress,
-      totalAmount,
       status: "pending",
-    });
+    };
+    
+    console.log('Creating order with data:', orderData);
+    const order = new Order(orderData);
 
     await order.save();
+    console.log('Order saved successfully:', order._id);
 
-    // Simulate delivery updates
-    simulateDeliveryUpdate(order._id);
 
     res.status(201).json(order);
   } catch (err) {
+    console.error('Create order error:', err);
     res
       .status(500)
       .json({ message: "Failed to create order", error: err.message });
@@ -79,11 +97,16 @@ const createOrder = async (req, res) => {
 const submitComplaint = async (req, res) => {
   try {
     const { orderId } = req.params;
-    const { complaintType, description, priority, contactPreference } = req.body;
+    const { complaintType, description, email, phone } = req.body;
 
     // Validate required fields
-    if (!complaintType || !description || !priority) {
-      return res.status(400).json({ message: "Missing required fields" });
+    if (!complaintType || !description) {
+      return res.status(400).json({ message: "Missing required fields: complaintType and description" });
+    }
+
+    // Validate at least one contact method is provided
+    if (!email && !phone) {
+      return res.status(400).json({ message: "At least one contact method (email or phone) is required" });
     }
 
     // Verify order exists and belongs to user
@@ -100,8 +123,8 @@ const submitComplaint = async (req, res) => {
     const complaint = {
       complaintType,
       description,
-      priority,
-      contactPreference: contactPreference || [],
+      email: email || undefined,
+      phone: phone || undefined,
       submittedAt: new Date(),
       status: 'pending'
     };

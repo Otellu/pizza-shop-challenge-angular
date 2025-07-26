@@ -21,10 +21,6 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    totalAmount: {
-      type: Number,
-      required: true,
-    },
     complaint: {
       type: {
         complaintType: {
@@ -37,15 +33,13 @@ const orderSchema = new mongoose.Schema(
           required: true,
           minlength: 20,
         },
-        priority: {
+        email: {
           type: String,
-          enum: ["low", "medium", "high"],
-          required: true,
+          required: false,
         },
-        contactPreference: {
-          type: [String],
-          enum: ["email", "phone"],
-          default: [],
+        phone: {
+          type: String,
+          required: false,
         },
         status: {
           type: String,
@@ -62,7 +56,21 @@ const orderSchema = new mongoose.Schema(
   },
   {
     timestamps: true, // This will auto-generate createdAt and updatedAt
+    toJSON: { virtuals: true }, // Include virtuals when converting to JSON
+    toObject: { virtuals: true } // Include virtuals when converting to Object
   }
 );
+
+// Virtual for totalAmount - calculates from items
+orderSchema.virtual("totalAmount").get(function () {
+  if (!this.items || this.items.length === 0) {
+    return 0;
+  }
+  return this.items.reduce((sum, item) => {
+    const price = item.price || 0;
+    const quantity = item.quantity || 1;
+    return sum + (price * quantity);
+  }, 0);
+});
 
 module.exports = mongoose.model("Order", orderSchema);
