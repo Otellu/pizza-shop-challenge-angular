@@ -60,8 +60,10 @@ export interface CreateOrderData {
 }
 
 export interface PizzaQueryParams {
-  filter?: 'veg' | 'non-veg' | 'all';
+  filter?: 'veg' | 'non-veg';
+  sortBy?: 'price' | 'name' | 'createdAt';
   sortOrder?: 'asc' | 'desc';
+  search?: string;
   page?: number;
   limit?: number;
 }
@@ -104,19 +106,20 @@ export class ApiService {
     return this.http.get<Pizza[]>(`${this.apiUrl}/pizzas`, { headers });
   }
 
-  getAllPizzasWithQuery(queryParams: PizzaQueryParams): Observable<{
-    pizzas: Pizza[];
-    total: number;
-    page: number;
-    totalPages: number;
-  }> {
+  getAllPizzasWithQuery(queryParams: PizzaQueryParams): Observable<any> {
     let params = new HttpParams();
 
     if (queryParams.filter) {
       params = params.append('filter', queryParams.filter);
     }
+    if (queryParams.sortBy) {
+      params = params.append('sortBy', queryParams.sortBy);
+    }
     if (queryParams.sortOrder) {
       params = params.append('sortOrder', queryParams.sortOrder);
+    }
+    if (queryParams.search) {
+      params = params.append('search', queryParams.search);
     }
     if (queryParams.page) {
       params = params.append('page', queryParams.page.toString());
@@ -128,12 +131,7 @@ export class ApiService {
     const headers = {
       'Content-Type': 'application/json',
     };
-    return this.http.get<{
-      pizzas: Pizza[];
-      total: number;
-      page: number;
-      totalPages: number;
-    }>(`${this.apiUrl}/pizzas`, { params, headers });
+    return this.http.get<any>(`${this.apiUrl}/pizzas`, { params, headers, observe: 'response' });
   }
 
   // Order API

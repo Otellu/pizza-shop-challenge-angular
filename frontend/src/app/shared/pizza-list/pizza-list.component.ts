@@ -12,46 +12,15 @@ import { FilterButtonComponent } from '../filter-button/filter-button.component'
 import { LoaderComponent } from '../loader/loader.component';
 
 // ====================================================================
-// 🎯 FEATURE 1: Smart Pizza Discovery + State Management (35 minutes)
+// 🎯 SENIOR CHALLENGE: Smart Pizza Discovery + State Management
+// Time: ~35 minutes | Difficulty: Senior Level
+// 
+// Your implementation will be evaluated on:
+// - Code quality and organization
+// - Performance considerations  
+// - Error handling
+// - User experience
 // ====================================================================
-//
-// CURRENT STATE: Basic pizza fetching with simple TODO structure
-// YOUR TASK: Transform this into an advanced pizza discovery system
-//
-// 🚀 IMPLEMENT THESE FEATURES:
-//
-// ✅ 1. REAL-TIME SEARCH (8 minutes)
-//    - Add search input with RxJS debouncing (300ms)
-//    - Use BehaviorSubject + debounceTime + distinctUntilChanged
-//    - Reset pagination when search changes
-//
-// ✅ 2. SMART FILTERING (8 minutes) 
-//    - Three filter buttons: "All", "Veg", "Non-Veg"
-//    - Update API calls with filter parameter
-//    - Maintain filter state with NgRx Signals or component state
-//
-// ✅ 3. ADVANCED SORTING (7 minutes)
-//    - Dropdown: Default, Price (Low→High), Price (High→Low), Name (A→Z)
-//    - Use API sortBy and sortOrder parameters
-//    - Reset pagination when sort changes
-//
-// ✅ 4. INFINITE SCROLL (8 minutes)
-//    - Intersection Observer API on scroll trigger element
-//    - Load next page when scrolling near bottom
-//    - Append new pizzas to existing list
-//    - Handle "no more results" state
-//
-// ✅ 5. ORDER CREATION (4 minutes)
-//    - Integrate with existing cart service
-//    - POST to /api/orders when user clicks "Order Now"
-//    - Handle success/error with toast notifications
-//
-// 💡 HINTS:
-// - Use switchMap() to cancel previous API calls
-// - Reset currentPage to 1 when filters/search/sort change
-// - Use the existing state interface below
-// - API endpoint: /api/pizzas with query parameters
-// - Check existing CartService for order creation patterns
 
 type FilterType = 'all' | 'veg' | 'non-veg';
 type SortType = 'default' | 'price-asc' | 'price-desc' | 'name-asc';
@@ -101,15 +70,11 @@ export class PizzaListComponent implements OnInit, OnDestroy {
   };
 
   ngOnInit() {
-    this.setupSearch();
-    this.loadPizzas(true);
+    // TODO (5 min): Set up search functionality with debouncing
+    // TODO (3 min): Initialize intersection observer for infinite scroll
+    // TODO (2 min): Load initial pizza data
     
-    // TODO: Add state for filters, sorting, pagination, loading, etc.
-    
-    // Setup intersection observer for infinite scroll
-    setTimeout(() => {
-      this.setupInfiniteScroll();
-    }, 1000);
+    this.basicSetup(); // Enhance this implementation
   }
 
   ngOnDestroy() {
@@ -120,147 +85,70 @@ export class PizzaListComponent implements OnInit, OnDestroy {
     }
   }
 
-  private setupSearch() {
-    this.searchSubject.pipe(
-      debounceTime(500),
-      distinctUntilChanged(),
-      takeUntil(this.destroy$)
-    ).subscribe(query => {
-      this.state.searchQuery = query;
-      this.loadPizzas(true);
-    });
+  private setupSearch(): void {
+    // TODO: Implement search with RxJS
+    // Requirements:
+    // - Debounce user input
+    // - Cancel previous requests
+    // - Reset pagination on search
   }
 
-  private setupInfiniteScroll() {
-    if (!this.loadTrigger) return;
-
-    this.intersectionObserver = new IntersectionObserver(
-      (entries) => {
-        const target = entries[0];
-        if (target.isIntersecting && this.state.hasMore && !this.state.loading && !this.state.loadingMore) {
-          this.loadMorePizzas();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    this.intersectionObserver.observe(this.loadTrigger.nativeElement);
+  private setupInfiniteScroll(): void {
+    // TODO: Implement infinite scroll
+    // Requirements:
+    // - Use Intersection Observer API
+    // - Trigger when user scrolls near bottom
+    // - Prevent duplicate requests
   }
 
-  loadPizzas(reset = false) {
-    if (reset) {
-      this.state.currentPage = 1;
-      this.state.pizzas = [];
-      this.state.loading = true;
-    } else {
-      this.state.loadingMore = true;
-    }
-
-    // ========================================
-    // 🚀 TODO: IMPLEMENT ADVANCED API CALLS
-    // ========================================
-    //
-    // REPLACE the simple getAllPizzas() call below with:
-    // 
-    // 1. Use this.apiService.getAllPizzasWithQuery() method
-    // 2. Build query parameters from current state:
-    //    {
-    //      filter: this.state.currentFilter !== 'all' ? this.state.currentFilter : undefined,
-    //      sortBy: this.getSortField(this.state.currentSort),
-    //      sortOrder: this.getSortOrder(this.state.currentSort), 
-    //      search: this.state.searchQuery || undefined,
-    //      page: this.state.currentPage,
-    //      limit: 10
-    //    }
-    // 3. Handle pagination response structure:
-    //    response.body.pizzas, response.body.pagination
-    // 4. Update hasMore, totalPages from pagination object
-    // 
-    // EXAMPLE:
-    // const queryParams = { /* build from state */ };
-    // this.apiService.getAllPizzasWithQuery(queryParams).pipe(...)
+  loadPizzas(reset = false): void {
+    // TODO: Implement pizza loading with pagination
+    // Requirements:
+    // - Build query params from component state
+    // - Handle loading states properly
+    // - Append or replace results based on reset flag
+    // - Update pagination state
     
-    this.apiService.getAllPizzas()
-      .pipe(
-        catchError((error) => {
-          console.error('Failed to load pizzas:', error);
-          const errorMessage = error.error?.message || error.message || 'Failed to load pizzas';
-          this.state.error = errorMessage;
-          this.toastService.error(errorMessage);
-          return of([]);
-        }),
-        finalize(() => {
-          this.state.loading = false;
-          this.state.loadingMore = false;
-        }),
-        takeUntil(this.destroy$)
-      )
-      .subscribe((pizzas) => {
-        this.state.pizzas = pizzas;
-        this.state.totalPages = 1;
-        this.state.hasMore = false;
-        this.state.error = null;
-        console.log('Loaded pizzas:', pizzas);
-      });
+    // Basic implementation - enhance this
+    this.apiService.getAllPizzas().subscribe(
+      pizzas => this.state.pizzas = pizzas,
+      error => console.error(error)
+    );
   }
 
-  // ========================================
-  // 🚀 TODO: IMPLEMENT HELPER METHODS
-  // ========================================
-  
   private getSortField(sortType: SortType): string {
-    // TODO: Convert SortType to API field names
-    // 'default' -> 'createdAt'
-    // 'price-asc' -> 'price'
-    // 'price-desc' -> 'price'
-    // 'name-asc' -> 'name'
-    return 'createdAt'; // Replace with proper logic
+    // TODO: Map sort type to API field name
+    return 'createdAt';
   }
 
   private getSortOrder(sortType: SortType): 'asc' | 'desc' {
-    // TODO: Convert SortType to sort order
-    // 'default' -> 'desc'
-    // 'price-asc' -> 'asc'
-    // 'price-desc' -> 'desc'
-    // 'name-asc' -> 'asc'
-    return 'desc'; // Replace with proper logic
+    // TODO: Extract sort direction from sort type
+    return 'desc';
   }
 
-  private loadMorePizzas() {
-    if (this.state.hasMore && !this.state.loadingMore) {
-      this.state.currentPage++;
-      this.loadPizzas(false);
-    }
+  private loadMorePizzas(): void {
+    // TODO: Implement pagination logic
+    // Requirements:
+    // - Check if more pages available
+    // - Increment page counter
+    // - Append results to existing list
   }
 
-  // Filter methods
-  onFilterChange(filter: FilterType) {
-    if (this.state.currentFilter !== filter) {
-      this.state.currentFilter = filter;
-      this.loadPizzas(true);
-    }
+  onFilterChange(filter: FilterType): void {
+    // TODO: Handle filter changes
   }
 
-  // Sort methods
-  onSortChange(event: Event) {
-    const select = event.target as HTMLSelectElement;
-    const sort = select.value as SortType;
-    if (this.state.currentSort !== sort) {
-      this.state.currentSort = sort;
-      this.loadPizzas(true);
-    }
+  onSortChange(event: Event): void {
+    // TODO: Handle sort changes
   }
 
-  // Search methods
-  onSearchChange(event: Event) {
-    const input = event.target as HTMLInputElement;
-    this.searchSubject.next(input.value);
+  onSearchChange(event: Event): void {
+    // TODO: Handle search input changes
   }
 
-  // Cart methods
-  addToCart(pizza: Pizza) {
+  addToCart(pizza: Pizza): void {
+    // TODO: Add pizza to cart with feedback
     this.cartService.addToCart(pizza);
-    this.toastService.success(`${pizza.name} added to cart!`);
   }
 
   isInCart(pizza: Pizza): boolean {
@@ -310,11 +198,16 @@ export class PizzaListComponent implements OnInit, OnDestroy {
   trackByPizzaId(index: number, pizza: Pizza): string {
     return pizza.id;
   }
+  
+  // Basic setup method - candidates should enhance this
+  private basicSetup(): void {
+    this.setupSearch();
+    this.loadPizzas(true);
+    setTimeout(() => this.setupInfiniteScroll(), 1000);
+  }
 
-  // Clear filters method for template
-  clearFilters() {
-    this.onFilterChange('all');
-    this.searchSubject.next('');
+  clearFilters(): void {
+    // TODO: Reset all filters and search
   }
 
   // Image error handler

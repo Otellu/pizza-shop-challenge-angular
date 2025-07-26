@@ -9,44 +9,15 @@ import { ToastService } from '../../services/toast.service';
 import { LoaderComponent } from '../../shared/loader/loader.component';
 
 // ====================================================================
-// 🎯 FEATURE 3: Order Complaint Form with Advanced Validation (25 minutes)
+// 🎯 SENIOR CHALLENGE: Order Complaint Form with Advanced Validation
+// Time: ~25 minutes | Difficulty: Senior Level
+// 
+// Your implementation will be evaluated on:
+// - Advanced form validation techniques
+// - Reactive forms expertise
+// - Error handling
+// - User experience
 // ====================================================================
-//
-// CURRENT STATE: Empty component with no functionality
-// YOUR TASK: Build a comprehensive complaint system for user orders
-//
-// 🚀 IMPLEMENT THESE FEATURES:
-//
-// ✅ 1. ORDER HISTORY DISPLAY (8 minutes)
-//    - Fetch user orders using this.apiService.getUserOrders()
-//    - Display orders in a responsive layout with order details
-//    - Add "File Complaint" button/link for each order
-//    - Show order status, items, date, and total amount
-//
-// ✅ 2. REACTIVE FORMS SETUP (8 minutes)
-//    - Create FormGroup with proper TypeScript typing
-//    - Add fields: complaintType (dropdown), description (textarea), priority (radio), contactPreference (checkboxes)
-//    - Use FormBuilder to construct the form structure
-//    - Implement proper form initialization and reset
-//
-// ✅ 3. ADVANCED VALIDATION (6 minutes)
-//    - Custom validator for description minimum 20 characters
-//    - Required field validation for complaintType and priority
-//    - Real-time validation with error display as user types
-//    - Form state management (dirty, touched, valid states)
-//
-// ✅ 4. FORM SUBMISSION & UX (3 minutes)
-//    - Handle form submission with API call to POST /api/orders/:id/complaint
-//    - Show loading states during submission
-//    - Success/error feedback with toast notifications
-//    - Reset form and close modal/section after successful submission
-//
-// 💡 HINTS:
-// - Use FormArray for contactPreference checkboxes
-// - Modal can be simple show/hide with *ngIf directive
-// - API endpoint: POST /api/orders/:orderId/complaint
-// - Consider using signals for reactive state management
-// - Handle form validation errors gracefully
 
 interface ComplaintForm {
   complaintType: 'Quality Issue' | 'Delivery Problem' | 'Wrong Order' | 'Other';
@@ -68,28 +39,19 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
   private formBuilder = inject(FormBuilder);
   private destroy$ = new Subject<void>();
 
-  // ========================================
-  // 🚀 TODO: ADD COMPONENT STATE
-  // ========================================
+  // Component state
   orders: Order[] = [];
   loadingOrders = true;
   selectedOrderId: string | null = null;
   showComplaintForm = false;
   submittingComplaint = false;
 
-  // ========================================
-  // 🚀 TODO: CREATE REACTIVE FORM
-  // ========================================
+  // Reactive form instance
   complaintForm: FormGroup;
 
   constructor() {
-    // Initialize basic form structure (candidates will add custom validation)
-    this.complaintForm = this.formBuilder.group({
-      complaintType: ['', Validators.required],
-      description: ['', Validators.required], // TODO: Add custom minLength validator
-      priority: ['', Validators.required],
-      contactPreference: this.formBuilder.array([])
-    });
+    // TODO: Initialize form with proper validation
+    this.initializeForm();
   }
 
   ngOnInit() {
@@ -101,89 +63,63 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  // ========================================
-  // 🚀 TODO: IMPLEMENT ORDER LOADING
-  // ========================================
-  
-  private loadUserOrders() {
+  private loadUserOrders(): void {
+    // TODO: Load user's order history
+    // Requirements:
+    // - Fetch orders from API
+    // - Handle loading states
+    // - Display appropriate error messages
+    
     this.loadingOrders = true;
-    this.apiService.getUserOrders()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (orders) => {
-          this.orders = orders;
-          this.loadingOrders = false;
-        },
-        error: (error) => {
-          this.toastService.error('Failed to load order history');
-          this.loadingOrders = false;
-        }
-      });
+    this.apiService.getUserOrders().subscribe({
+      next: (orders) => this.orders = orders,
+      error: () => this.toastService.error('Failed to load orders'),
+      complete: () => this.loadingOrders = false
+    });
   }
 
-  // ========================================
-  // 🚀 TODO: IMPLEMENT COMPLAINT FUNCTIONALITY
-  // ========================================
-
-  openComplaintForm(orderId: string) {
+  openComplaintForm(orderId: string): void {
+    // TODO: Open complaint form for specific order
     this.selectedOrderId = orderId;
     this.showComplaintForm = true;
-    this.resetComplaintForm();
   }
 
-  closeComplaintForm() {
+  closeComplaintForm(): void {
+    // TODO: Close form and reset state
     this.showComplaintForm = false;
     this.selectedOrderId = null;
-    this.resetComplaintForm();
   }
 
-  submitComplaint() {
-    // ========================================
-    // 🚀 TODO: IMPLEMENT COMPLAINT SUBMISSION
-    // ========================================
-    //
-    // 1. Validate the form
-    // 2. Get form values and orderId
-    // 3. Set submitting state
-    // 4. Call API: this.apiService.submitComplaint(orderId, complaintData)
-    // 5. Handle success: show toast, close form, refresh orders
-    // 6. Handle error: show error toast, keep form open
-    //
-    // EXAMPLE:
-    // if (this.complaintForm.valid && this.selectedOrderId) {
-    //   this.submittingComplaint = true;
-    //   const complaintData = this.complaintForm.value;
-    //   
-    //   // Make API call here
-    //   // Handle response
-    // }
+  submitComplaint(): void {
+    // TODO: Submit complaint to API
+    // Requirements:
+    // - Validate form before submission
+    // - Show loading state during API call
+    // - Handle success/error appropriately
+    // - Reset form on success
   }
 
-  private resetComplaintForm() {
+  private resetComplaintForm(): void {
+    // TODO: Reset form to initial state
     this.complaintForm.reset();
-    // Clear contact preference checkboxes
-    const contactArray = this.complaintForm.get('contactPreference') as FormArray;
-    contactArray.clear();
   }
 
-  // ========================================
-  // 🚀 TODO: IMPLEMENT CUSTOM VALIDATORS
-  // ========================================
-
-  private minLengthValidator(minLength: number) {
-    // TODO: Create custom validator for minimum length
-    // return (control: AbstractControl) => {
-    //   if (!control.value || control.value.length >= minLength) {
-    //     return null;
-    //   }
-    //   return { minLength: { requiredLength: minLength, actualLength: control.value.length } };
-    // };
-    return null; // Temporary return
+  private minLengthValidator(minLength: number): any {
+    // TODO: Create custom validator
+    return null;
+  }
+  
+  private initializeForm(): void {
+    // TODO: Set up form with validation rules
+    this.complaintForm = this.formBuilder.group({
+      complaintType: ['', Validators.required],
+      description: ['', Validators.required],
+      priority: ['', Validators.required],
+      contactPreference: this.formBuilder.array([])
+    });
   }
 
-  // ========================================
-  // 🚀 TODO: ADD HELPER METHODS
-  // ========================================
+  // Helper methods for template
 
   getComplaintTypes() {
     return [
