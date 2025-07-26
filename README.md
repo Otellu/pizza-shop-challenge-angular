@@ -436,8 +436,9 @@ The complaint form should collect this data:
 interface ComplaintForm {
   complaintType: 'Quality Issue' | 'Delivery Problem' | 'Wrong Order' | 'Other';
   description: string; // Required, min 20 characters
-  priority: 'low' | 'medium' | 'high';
-  contactPreference: ('email' | 'phone')[]; // Optional array
+  email?: string; // Optional, with email validation when provided
+  phone?: string; // Optional, with India phone number validation (+91 format) when provided
+  // Note: At least one of email or phone must be provided
 }
 ```
 
@@ -455,8 +456,22 @@ Content-Type: application/json
 {
   "complaintType": "Quality Issue",
   "description": "Pizza was cold and toppings were missing",
-  "priority": "high",
-  "contactPreference": ["email", "phone"]
+  "email": "user@example.com",
+  "phone": "+919876543210"
+}
+
+# Alternative example with only email:
+{
+  "complaintType": "Delivery Problem",
+  "description": "Order arrived 2 hours late and was completely cold",
+  "email": "customer@domain.com"
+}
+
+# Alternative example with only phone:
+{
+  "complaintType": "Wrong Order",
+  "description": "Received completely different pizza than what was ordered",
+  "phone": "+918765432109"
 }
 
 # Also available:
@@ -473,18 +488,20 @@ GET /api/orders/mine  # Get user's order history
 - [ ] Create `FormGroup` with proper TypeScript typing
 - [ ] Implement custom validators for description length (min 20 chars)
 - [ ] Add conditional validation for complaint type selection
-- [ ] Use `FormArray` for contactPreference checkboxes
 
 **Advanced Validation:**
 - [ ] Real-time validation with error display as user types
-- [ ] Cross-field validation (priority based on complaint type)
+- [ ] Email validation with proper regex pattern (when email is provided)
+- [ ] India phone number validation (+91 10-digit format) (when phone is provided)
+- [ ] **Conditional validation**: At least one contact method (email OR phone) must be provided
+- [ ] Cross-field validation using custom form-level validators
 - [ ] Custom async validators if needed
 - [ ] Form state management (dirty, touched, valid states)
 
 **User Interface:**
 - [ ] Add "File Complaint" button/link for each order
 - [ ] Implement modal popup or expandable form per order
-- [ ] Form fields: dropdown, textarea, radio buttons, checkboxes
+- [ ] Form fields: dropdown, textarea, email input, phone input
 - [ ] Proper form state feedback (disabled submit until valid)
 
 **Form Submission:**
