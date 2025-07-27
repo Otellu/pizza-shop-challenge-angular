@@ -45,7 +45,11 @@ const getPizzas = async (req, res) => {
     const skip = (pageNum - 1) * limitNum;
 
     // Execute query
-    const pizzas = await Pizza.find(query).sort(sortObj).skip(skip).limit(limitNum);
+    const pizzas = await Pizza.find(query)
+      .collation({ locale: 'en', strength: 2 }) // Add case-insensitive collation
+      .sort(sortObj)
+      .skip(skip)
+      .limit(limitNum);
 
     // Get total count for pagination
     const totalCount = await Pizza.countDocuments(query);

@@ -5,7 +5,8 @@
   "scripts": {
     "start": "nodemon src/app.js",
     "dev": "nodemon src/app.js",
-    "postinstall": "node src/migrations/seed-db.js"
+    "postinstall": "node src/migrations/seed-db.js",
+    "seed": "node seed.js"
   },
   "dependencies": {
     "axios": "^1.10.0",
