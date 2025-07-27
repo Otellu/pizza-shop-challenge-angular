@@ -20,7 +20,7 @@ test.describe('🎯 Feature 1: Candidate Task Validation', () => {
   test.beforeEach(async ({ page }) => {
     // Login as regular user to access pizza discovery
     await page.goto('/login');
-    await page.locator('input[name="email"]').fill('zenno.bruinsma@gmail.com');
+    await page.locator('input[name="email"]').fill('user@example.com');
     await page.locator('input[name="password"]').fill('test1234');
     await page.locator('button[type="submit"]').click();
 
@@ -199,10 +199,10 @@ test.describe('🎯 Feature 1: Candidate Task Validation', () => {
       
       // Verify all sort options exist
       const options = await sortSelect.locator('option').allTextContents();
-      expect(options).toContain('Sort: Default');
-      expect(options).toContain('Price: Low to High');
-      expect(options).toContain('Price: High to Low'); 
-      expect(options).toContain('Name: A to Z');
+      expect(options).toContain(' Sort: Default ');
+      expect(options).toContain(' Price: Low to High ');
+      expect(options).toContain(' Price: High to Low '); 
+      expect(options).toContain(' Name: A to Z ');
     });
 
     test('should use API sortBy and sortOrder parameters correctly', async ({ page }) => {
@@ -241,7 +241,9 @@ test.describe('🎯 Feature 1: Candidate Task Validation', () => {
       
       // Verify alphabetical order
       for (let i = 1; i < nameElements.length; i++) {
-        expect(nameElements[i].toLowerCase()).toBeGreaterThanOrEqual(nameElements[i - 1].toLowerCase());
+        const curr = nameElements[i].trim().toLowerCase();
+        const prev = nameElements[i - 1].trim().toLowerCase();
+        expect(curr >= prev).toBe(true);
       }
     });
 
@@ -288,14 +290,21 @@ test.describe('🎯 Feature 1: Candidate Task Validation', () => {
     });
 
     test('should load next page when scrolling near bottom', async ({ page }) => {
+      // Get initial count of pizzas
+      const initialCount = await page.locator('[data-testid="pizza-card"]').count();
+      
       // Scroll to trigger loading
       await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+      await page.waitForTimeout(1000);
       
-      // Should show loading indicator briefly
-      try {
-        await expect(page.locator('[data-testid="loading-more"]')).toBeVisible({ timeout: 2000 });
-      } catch {
-        // If no loading state, should show no-more-items
+      // Check if more pizzas were loaded
+      const newCount = await page.locator('[data-testid="pizza-card"]').count();
+      
+      if (newCount > initialCount) {
+        // More pizzas were loaded successfully
+        expect(newCount).toBeGreaterThan(initialCount);
+      } else {
+        // No more pizzas to load, should show end message
         await expect(page.locator('[data-testid="no-more-items"]')).toBeVisible();
       }
     });
@@ -363,10 +372,10 @@ test.describe('🎯 Feature 1: Candidate Task Validation', () => {
       const pizzaName = await page.locator('[data-testid="pizza-card"] h3').first().textContent();
       
       // Add pizza to cart
-      await page.locator('[data-testid="add-to-cart-button"]').first().click();
+      await page.locator('button[data-testid="add-to-cart-button"]').first().click();
       
       // Verify cart integration worked
-      await expect(page.locator('[data-testid="in-cart-button"]').first()).toBeVisible();
+      await expect(page.locator('button[data-testid="in-cart-button"]').first()).toBeVisible();
       
       // The POST to /api/orders would happen in checkout component
       // This validates the cart service integration point
@@ -385,17 +394,21 @@ test.describe('🎯 Feature 1: Candidate Task Validation', () => {
     });
 
     test('should prevent duplicate cart additions', async ({ page }) => {
+      // Get the first pizza card and its add to cart button
+      const firstPizzaCard = page.locator('[data-testid="pizza-card"]').first();
+      const addToCartButton = firstPizzaCard.locator('button[data-testid="add-to-cart-button"]');
+      
       // Add pizza to cart
-      await page.locator('[data-testid="add-to-cart-button"]').first().click();
+      await addToCartButton.click();
       await page.waitForTimeout(500);
       
       // Button should be disabled and show "In Cart"
-      const inCartButton = page.locator('[data-testid="in-cart-button"]').first();
+      const inCartButton = firstPizzaCard.locator('button[data-testid="in-cart-button"]');
       await expect(inCartButton).toBeVisible();
       await expect(inCartButton).toBeDisabled();
       
-      // Should not be able to add same pizza again
-      await expect(page.locator('[data-testid="add-to-cart-button"]').first()).not.toBeVisible();
+      // Should not be able to add same pizza again - check the same card
+      await expect(addToCartButton).not.toBeVisible();
     });
   });
 
@@ -481,7 +494,7 @@ test.describe('🎯 Feature 1: Candidate Task Validation', () => {
       await page.waitForTimeout(500);
       
       // 3. Apply sort
-      await page.locator('[data-testid="sort-select"]').selectOption('price-desc');
+      await page.locator('select[data-testid="sort-select"]').selectOption('price-desc');
       await page.waitForTimeout(500);
       
       // Verify all state is maintained
@@ -491,6 +504,7 @@ test.describe('🎯 Feature 1: Candidate Task Validation', () => {
       await expect(page.locator('[data-testid="filter-veg"]')).toHaveClass(/active/);
       
       const sortValue = await page.locator('[data-testid="sort-select"]').inputValue();
+      console.log(sortValue);
       expect(sortValue).toBe('price-desc');
       
       // All visible pizzas should match all criteria
