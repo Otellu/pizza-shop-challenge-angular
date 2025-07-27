@@ -1,9 +1,7 @@
 import { Component, OnInit, OnDestroy, ElementRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subject, BehaviorSubject, debounceTime, distinctUntilChanged, switchMap, catchError, finalize } from 'rxjs';
-import { of } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Subject, BehaviorSubject } from 'rxjs';
 
 import { ApiService, PizzaQueryParams } from '../../services/api.service';
 import { CartService, Pizza } from '../../services/cart.service';
@@ -27,15 +25,6 @@ type SortType = 'default' | 'price-asc' | 'price-desc' | 'name-asc';
 
 interface PizzaListState {
   pizzas: Pizza[];
-  currentFilter: FilterType;
-  currentSort: SortType;
-  currentPage: number;
-  totalPages: number;
-  hasMore: boolean;
-  loading: boolean;
-  loadingMore: boolean;
-  searchQuery: string;
-  error: string | null;
 }
 
 @Component({
@@ -58,15 +47,6 @@ export class PizzaListComponent implements OnInit, OnDestroy {
   // State management
   state: PizzaListState = {
     pizzas: [],
-    currentFilter: 'all',
-    currentSort: 'default',
-    currentPage: 1,
-    totalPages: 1,
-    hasMore: true,
-    loading: false,
-    loadingMore: false,
-    searchQuery: '',
-    error: null
   };
 
   ngOnInit() {
@@ -151,13 +131,9 @@ export class PizzaListComponent implements OnInit, OnDestroy {
     this.cartService.addToCart(pizza);
   }
 
-  isInCart(pizza: Pizza): boolean {
+  isInCart(pizza: Pizza): void {
     // Match React's logic - check both _id and id fields
-    const pizzaId = (pizza as any)._id || pizza.id;
-    return this.cartService.items().some(item => {
-      const itemId = (item as any)._id || item.id;
-      return itemId === pizzaId;
-    });
+
   }
 
   // Utility methods
@@ -172,9 +148,9 @@ export class PizzaListComponent implements OnInit, OnDestroy {
 
   getFilterButtons() {
     return [
-      { key: 'all' as FilterType, text: 'All', active: this.state.currentFilter === 'all' },
-      { key: 'veg' as FilterType, text: 'Veg', active: this.state.currentFilter === 'veg' },
-      { key: 'non-veg' as FilterType, text: 'Non-Veg', active: this.state.currentFilter === 'non-veg' }
+      { key: 'all' as FilterType, text: 'All', active: 'all' },
+      { key: 'veg' as FilterType, text: 'Veg', active: false },
+      { key: 'non-veg' as FilterType, text: 'Non-Veg', active: false }
     ];
   }
 

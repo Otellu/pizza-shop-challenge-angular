@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray, AbstractControl } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -22,8 +22,8 @@ import { LoaderComponent } from '../../shared/loader/loader.component';
 interface ComplaintForm {
   complaintType: 'Quality Issue' | 'Delivery Problem' | 'Wrong Order' | 'Other';
   description: string;
-  priority: 'low' | 'medium' | 'high';
-  contactPreference: string[]; // ['email', 'phone']
+  email?: string; // Optional, must be valid email format if provided
+  phone?: string; // Optional, must be valid Indian phone number if provided
 }
 
 @Component({
@@ -47,7 +47,7 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
   submittingComplaint = false;
 
   // Reactive form instance
-  complaintForm: FormGroup;
+  complaintForm!: FormGroup;
 
   constructor() {
     // TODO: Initialize form with proper validation
@@ -104,22 +104,56 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
     this.complaintForm.reset();
   }
 
-  private minLengthValidator(minLength: number): any {
-    // TODO: Create custom validator
-    return null;
-  }
+  // TODO: Create custom validators
+  // private minLengthValidator(minLength: number): any {}
+
+  // private emailValidator(): any {}
+
+  // private indiaPhoneValidator(): any {}
+
+  // private atLeastOneContactValidator(): any {}
   
   private initializeForm(): void {
     // TODO: Set up form with validation rules
+    // Requirements:
+    // - complaintType: required
+    // - description: required, minimum 20 characters
+    // - email: optional, must be valid email format if provided
+    // - phone: optional, must be valid Indian phone number if provided
+    // - Cross-field validation: at least one contact method required
     this.complaintForm = this.formBuilder.group({
       complaintType: ['', Validators.required],
-      description: ['', Validators.required],
-      priority: ['', Validators.required],
-      contactPreference: this.formBuilder.array([])
+      description: ['', [Validators.required]],
+      email: [''],
+      phone: ['', ]
     });
   }
 
-  // Helper methods for template
+  // TODO: Helper methods for template validation
+  hasError(fieldName: string, errorType: string): boolean {
+    // TODO: Check if field has specific error type
+    return false;
+  }
+
+  hasContactError(): boolean {
+    // TODO: Check if form has contact method validation error
+    return false;
+  }
+
+  getErrorMessage(fieldName: string): string {
+    // TODO: Get appropriate error message for field
+    // Requirements:
+    // - Required field errors
+    // - Email format errors
+    // - Indian phone number errors
+    // - Minimum length errors
+    return '';
+  }
+
+  getContactMethodError(): string {
+    // TODO: Get error message for contact method validation
+    return 'Please provide either an email address or phone number';
+  }
 
   getComplaintTypes() {
     return [
@@ -127,21 +161,6 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
       { value: 'Delivery Problem', label: 'Delivery Problem' },
       { value: 'Wrong Order', label: 'Wrong Order' },
       { value: 'Other', label: 'Other' }
-    ];
-  }
-
-  getPriorityOptions() {
-    return [
-      { value: 'low', label: 'Low' },
-      { value: 'medium', label: 'Medium' },
-      { value: 'high', label: 'High' }
-    ];
-  }
-
-  getContactOptions() {
-    return [
-      { value: 'email', label: 'Email' },
-      { value: 'phone', label: 'Phone' }
     ];
   }
 
@@ -163,4 +182,11 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
       default: return 'bg-gray-100 text-gray-800';
     }
   }
+
+    // Helper methods for template
+    complaintTypes = this.getComplaintTypes();
 }
+
+
+
+

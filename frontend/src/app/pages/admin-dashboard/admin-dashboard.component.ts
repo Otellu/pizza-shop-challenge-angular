@@ -6,14 +6,13 @@ import { LoaderComponent } from '../../shared/loader/loader.component';
 import { Subject, interval, switchMap, takeUntil, catchError, of, startWith, Observable } from 'rxjs';
 
 // ====================================================================
-// 🎯 SENIOR CHALLENGE: Real-Time Admin Order Dashboard
+// Real-Time Admin Order Dashboard
 // Time: ~30 minutes | Difficulty: Senior Level
 // 
 // Your implementation will be evaluated on:
 // - Real-time data handling
 // - Performance optimization
 // - Memory management
-// - User experience
 // ====================================================================
 
 @Component({
@@ -141,4 +140,32 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       error: () => this.toastService.error('Failed to confirm order')
     });
   }
+
+  // TODO: Add status update functionality
+  isOrderUpdating(orderId: string): boolean {
+    return false;
+  }
+
+  // TODO: Add status update functionality
+  getAvailableStatusTransitions(currentStatus: Order['status']): Order['status'][] {
+    return [];
+  }
+
+
+
+  getAllStatuses(): string[] {
+    return ['pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered'];
+  }
+
+  // TODO: Add status update functionality
+  onStatusChange(orderId: string, event: Event) {
+    
+  }
+
+  // TODO: Add status update functionality
+  isStatusTransitionAllowed(currentStatus: Order['status'], newStatus: Order['status']): boolean {
+    return false;
+  }
+
+  
 }
