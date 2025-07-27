@@ -268,12 +268,9 @@ export class PizzaListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // Sort methods
   onSortChange(event: Event) {
-    const select = event.target as HTMLSelectElement;
-    const sort = select.value as SortType;
-    if (this.state.currentSort !== sort) {
-      this.state.currentSort = sort;
-      this.loadPizzas(true);
-    }
+    // Since we're using [(ngModel)], the state.currentSort is already updated
+    // We just need to reload the pizzas
+    this.loadPizzas(true);
   }
 
   // Search methods
@@ -306,6 +303,8 @@ export class PizzaListComponent implements OnInit, AfterViewInit, OnDestroy {
   addToCart(pizza: Pizza) {
     this.cartService.addToCart(pizza);
     this.toastService.success(`${pizza.name} added to cart!`);
+    // Force change detection by triggering a state update
+    this.state = { ...this.state };
   }
 
   isInCart(pizza: Pizza): boolean {

@@ -426,7 +426,6 @@ You'll implement an advanced complaint form system that demonstrates senior Angu
 - **Location**: Add complaint functionality to `/orders` page (Order History)
 - **Advanced Validation**: Custom validators with real-time feedback
 - **Reactive Forms**: Complex form state management
-- **User Experience**: Form per order with modal/dropdown interface
 
 ## 📊 Expected Complaint Form Structure
 
@@ -499,9 +498,6 @@ GET /api/orders/mine  # Get user's order history
 - [ ] Form state management (dirty, touched, valid states)
 
 **User Interface:**
-- [ ] Add "File Complaint" button/link for each order
-- [ ] Implement modal popup or expandable form per order
-- [ ] Form fields: dropdown, textarea, email input, phone input
 - [ ] Proper form state feedback (disabled submit until valid)
 
 **Form Submission:**

@@ -1,11 +1,11 @@
 <div class="max-w-5xl mx-auto py-8 px-4">
-  <h1 class="text-3xl font-bold mb-6 text-red-600">Admin Dashboard</h1>
-  
+  <h1 class="text-3xl font-bold mb-6 text-red-600" data-testid="admin-dashboard">Admin Dashboard</h1>
+
   <!-- Statistics Cards -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
     <div class="bg-white p-6 rounded-lg shadow">
       <h3 class="text-lg font-semibold text-gray-700 mb-2">Total Orders</h3>
-      <p class="text-3xl font-bold text-blue-600">{{ totalOrders }}</p>
+      <p class="text-3xl font-bold text-blue-600" data-testid="total-orders">{{ totalOrders }}</p>
     </div>
     <div class="bg-white p-6 rounded-lg shadow">
       <h3 class="text-lg font-semibold text-gray-700 mb-2">Pending Orders</h3>
@@ -17,12 +17,12 @@
     </div>
     <div class="bg-white p-6 rounded-lg shadow">
       <h3 class="text-lg font-semibold text-gray-700 mb-2">Total Revenue</h3>
-      <p class="text-3xl font-bold text-red-600">₹{{ totalRevenue }}</p>
+      <p class="text-3xl font-bold text-red-600">₹{{ totalRevenue.toFixed(2) }}</p>
     </div>
   </div>
 
   <!-- Orders Table -->
-  <div class="bg-white rounded-xl shadow mb-8 p-4 overflow-x-auto">
+  <div class="bg-white rounded-xl shadow mb-8 p-4 overflow-x-auto" data-testid="orders-container">
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-xl font-semibold">All Orders</h2>
       <div class="flex items-center text-sm text-gray-500">
@@ -30,16 +30,18 @@
         Live Updates Every {{ pollingInterval / 1000 }}s
       </div>
     </div>
-    
-    <div *ngIf="loadingOrders" class="text-center py-8">
-      <app-loader></app-loader>
+
+    <div *ngIf="loadingOrders" class="text-center py-8" data-testid="loading-orders">
+      <app-loader data-testid="loading-spinner"></app-loader>
     </div>
-    
-    <div *ngIf="!loadingOrders && orders.length === 0" class="text-center py-8 text-gray-400">
+
+    <div *ngIf="!loadingOrders && orders.length === 0" class="text-center py-8 text-gray-400"
+      data-testid="no-orders-message">
       No orders found.
     </div>
-    
-    <table *ngIf="!loadingOrders && orders.length > 0" class="min-w-full divide-y divide-gray-200">
+
+    <table *ngIf="!loadingOrders && orders.length > 0" class="min-w-full divide-y divide-gray-200"
+      data-testid="orders-table">
       <thead class="bg-gray-50">
         <tr>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
@@ -52,34 +54,35 @@
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
-        <tr *ngFor="let order of orders" class="hover:bg-gray-50">
-          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+        <tr *ngFor="let order of orders" class="hover:bg-gray-50" data-testid="order-card">
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" data-testid="order-id">
             #{{ getOrderId(order) }}
           </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" data-testid="order-user">
             {{ order.user?.name || order.customerInfo.name || 'Unknown' }}
             <br />
             <span class="text-gray-500">{{ order.user?.email || 'No email' }}</span>
+            <br />
+            <span class="text-gray-500 text-xs" data-testid="order-address">{{ order.customerInfo?.address || 'No
+              address' }}</span>
           </td>
-          <td class="px-6 py-4 text-sm text-gray-900">
-            {{ order.items.length }} item(s)
+          <td class="px-6 py-4 text-sm text-gray-900" data-testid="order-items">
+            <span data-testid="order-item-count">{{ order.items.length }} item(s)</span>
             <br />
             <span class="text-gray-500 text-xs">
               {{ getItemsPreview(order.items) }}
             </span>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" data-testid="order-total">
             ₹{{ order.totalAmount }}
           </td>
           <td class="px-6 py-4 whitespace-nowrap">
-            <span 
-              [ngClass]="getStatusClass(order.status)"
-              class="px-3 py-1 rounded-full text-sm font-medium"
-            >
+            <span [ngClass]="getStatusClass(order.status)" class="px-3 py-1 rounded-full text-sm font-medium"
+              data-testid="order-status">
               {{ getStatusText(order.status) }}
             </span>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" data-testid="order-timestamp">
             {{ formatDate(order.createdAt) }}
             <br />
             <span class="text-gray-500 text-xs">
@@ -88,40 +91,21 @@
           </td>
           <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
             <!-- Loading state for updating orders -->
-            <div *ngIf="isOrderUpdating(order.id)" class="flex items-center">
+            <div *ngIf="isOrderUpdating(order.id)" class="flex items-center" data-testid="updating-status">
               <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600 mr-2"></div>
               <span class="text-gray-500">Updating...</span>
             </div>
-            
-            <!-- Action buttons when not updating -->
-            <div *ngIf="!isOrderUpdating(order.id)" class="flex flex-wrap gap-1">
-              <!-- Quick confirm button for pending orders -->
-              <button 
-                *ngIf="order.status === 'pending'" 
-                class="px-2 py-1 bg-green-500 hover:bg-green-600 text-white rounded text-xs font-medium transition-colors"
-                (click)="confirmOrder(order)"
-                title="Quick Confirm"
-              >
-                Confirm
-              </button>
-              
-              <!-- Status transition buttons -->
-              <button 
-                *ngFor="let newStatus of getAvailableStatusTransitions(order.status)"
-                class="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-xs font-medium transition-colors mr-1 mb-1"
-                (click)="updateOrderStatus(order.id, newStatus)"
-                [title]="'Update to ' + getStatusText(newStatus)"
-              >
-                {{ getStatusText(newStatus) }}
-              </button>
-              
-              <!-- View button -->
-              <button 
-                class="px-2 py-1 bg-gray-500 hover:bg-gray-600 text-white rounded text-xs font-medium transition-colors"
-                title="View Details"
-              >
-                View
-              </button>
+
+            <!-- Status select dropdown when not updating -->
+            <div *ngIf="!isOrderUpdating(order.id)">
+              <select
+                class="px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                [value]="order.status" (change)="onStatusChange(order.id, $event)" data-testid="status-select">
+                <option *ngFor="let status of getAllStatuses()" [value]="status"
+                  [disabled]="!isStatusTransitionAllowed(order.status, status) && status !== order.status">
+                  {{ getStatusText(status) }}
+                </option>
+              </select>
             </div>
           </td>
         </tr>

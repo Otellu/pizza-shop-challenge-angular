@@ -247,4 +247,20 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         }
       });
   }
+
+  onStatusChange(orderId: string, event: Event) {
+    const select = event.target as HTMLSelectElement;
+    const newStatus = select.value as Order['status'];
+    this.updateOrderStatus(orderId, newStatus);
+  }
+
+  getAllStatuses(): Order['status'][] {
+    return ['pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'];
+  }
+
+  isStatusTransitionAllowed(currentStatus: Order['status'], targetStatus: Order['status']): boolean {
+    if (currentStatus === targetStatus) return true; // Allow current status to be selected
+    const allowedTransitions = this.getAvailableStatusTransitions(currentStatus);
+    return allowedTransitions.includes(targetStatus);
+  }
 }
