@@ -53,7 +53,7 @@ function authInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) {
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    { provide: APP_BASE_HREF, useValue: '/absproxy/3000' },
+    { provide: APP_BASE_HREF, useValue: '/absproxy/4200' },
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient(withInterceptors([authInterceptor])),
