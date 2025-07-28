@@ -9,7 +9,7 @@ const getPizzas = async (req, res) => {
     }
 
     const {
-      filter,
+      veg,
       sortBy = 'createdAt',
       sortOrder = 'desc',
       page = 1,
@@ -21,10 +21,10 @@ const getPizzas = async (req, res) => {
     let query = {};
     
     // Apply vegetarian filter
-    if (filter === 'veg') {
-      query.isVegetarian = true;
-    } else if (filter === 'non-veg') {
-      query.isVegetarian = false;
+    if (veg === 'true') {
+      query.veg = true;
+    } else if (veg === 'false') {
+      query.veg = false;
     }
     
     // Apply search filter
