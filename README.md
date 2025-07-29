@@ -18,23 +18,15 @@ Welcome to the Pizza Shop Challenge! This is an Angular frontend challenge where
 
 <summary><i>Open instructions</i></summary>
 
-### 1. Connect Mongo DB
-
-![MongoDB Connection](https://juyrycyjglwfsllqrgpi.supabase.co/storage/v1/object/public/coding-challenges-files//mong-connection.jpg)
-
-1.  Click on the mongo db extension
-2.  Once the extension is opened, click the connect button.
-3.  Enter the connection string `mongodb://pizzauser:pizzapass@mongo-db:27017/testdb?authSource=testdb` in the connection bar at the top.
-
-### 2. Start Development Servers
+### 1. Start Development Servers
 
 ```bash
 # Terminal 1 - Backend
 cd backend
-npm run dev
+npm start
 
 # Terminal 2 - Frontend (Angular)
-cd frontend-angular
+cd frontend
 npm start
 ```
 
@@ -436,9 +428,16 @@ The complaint form should collect this data:
 interface ComplaintForm {
   complaintType: 'Quality Issue' | 'Delivery Problem' | 'Wrong Order' | 'Other';
   description: string; // Required, min 20 characters
-  priority: 'low' | 'medium' | 'high';
-  contactPreference: ('email' | 'phone')[]; // Optional array
+  email?: string; // Optional, must be valid email format if provided
+  phone?: string; // Optional, must be valid Indian phone number if provided
 }
+```
+
+**Validation Rules:**
+- At least one contact method (email OR phone) is required
+- Email must be in valid email format (e.g., user@example.com)
+- Phone must be a valid Indian phone number (e.g., +919876543210 or 9876543210)
+- Description must be at least 20 characters
 ```
 
 ## 🔧 Available Backend API
@@ -455,8 +454,8 @@ Content-Type: application/json
 {
   "complaintType": "Quality Issue",
   "description": "Pizza was cold and toppings were missing",
-  "priority": "high",
-  "contactPreference": ["email", "phone"]
+  "email": "user@example.com",
+  "phone": "+919876543210"
 }
 
 # Also available:
@@ -472,20 +471,16 @@ GET /api/orders/mine  # Get user's order history
 **Reactive Forms Setup:**
 - [ ] Create `FormGroup` with proper TypeScript typing
 - [ ] Implement custom validators for description length (min 20 chars)
-- [ ] Add conditional validation for complaint type selection
-- [ ] Use `FormArray` for contactPreference checkboxes
+- [ ] Add email validation with proper regex pattern
+- [ ] Add Indian phone number validation with regex pattern
+- [ ] Implement cross-field validation (at least one contact method required)
 
 **Advanced Validation:**
 - [ ] Real-time validation with error display as user types
-- [ ] Cross-field validation (priority based on complaint type)
-- [ ] Custom async validators if needed
+- [ ] Cross-field validation (at least one contact method required)
+- [ ] Email format validation with proper error messages
+- [ ] Indian phone number validation with proper error messages
 - [ ] Form state management (dirty, touched, valid states)
-
-**User Interface:**
-- [ ] Add "File Complaint" button/link for each order
-- [ ] Implement modal popup or expandable form per order
-- [ ] Form fields: dropdown, textarea, radio buttons, checkboxes
-- [ ] Proper form state feedback (disabled submit until valid)
 
 **Form Submission:**
 - [ ] Handle form submission with proper error handling
@@ -497,65 +492,73 @@ GET /api/orders/mine  # Get user's order history
 
 **You'll know it's working when:**
 
-1. Valid status updates succeed (pending → confirmed)
-2. Invalid transitions are rejected (delivered → pending)
-3. Missing order IDs return 404
-4. Missing required fields return 400
-5. Database errors are handled gracefully
+1. Form validates email format correctly (user@example.com)
+2. Form validates Indian phone numbers correctly (+919876543210 or 9876543210)
+3. Form requires at least one contact method (email OR phone)
+4. Description validation enforces minimum 20 characters
+5. Form submission works with proper API integration
+6. Error messages display clearly for each validation rule
 
 ## 🧪 Quick Verification
 
-1. Start server: `npm run dev`
-2. Create an order (use frontend or admin panel)
-3. Test valid transition: `pending → confirmed`
-4. Test invalid transition: `confirmed → pending` (should fail)
-5. Test missing order: use fake order ID (should return 404)
-6. Check logs for webhook activity
+1. Navigate to Order History page
+2. Click "File Complaint" on any order
+3. Test email validation: enter invalid email (should show error)
+4. Test phone validation: enter invalid Indian number (should show error)
+5. Test contact requirement: leave both email and phone empty (should show error)
+6. Test description validation: enter less than 20 characters (should show error)
+7. Submit valid form and verify success message
 
 ## ⚠️ Common Gotchas
 
-- Import Order model: `const Order = require('../models/Order')`
-- Check transitions before updating status
-- Use try/catch for database operations
-- Return appropriate HTTP status codes
-- Validate required fields before processing
-- Don't allow backwards status transitions
+- Email validation should accept standard email formats (user@domain.com)
+- Indian phone validation should accept: +919876543210, 9876543210, +91 9876543210
+- At least one contact method (email OR phone) must be provided
+- Description must be exactly 20+ characters (not just 20)
+- Form should show real-time validation as user types
+- Handle form submission errors gracefully with user feedback
 
 ## 🔗 API Examples
 
 ```bash
-# Valid status update (pending → confirmed)
-curl -X POST http://localhost:5000/api/webhook/delivery-update \
+# Submit complaint with email
+curl -X POST http://localhost:5000/api/orders/60d5f484f4b7a5b8c8f8e123/complaint \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <token>" \
   -d '{
-    "orderId": "60d5f484f4b7a5b8c8f8e123",
-    "status": "confirmed",
-    "timestamp": "2024-03-15T17:45:00Z"
+    "complaintType": "Quality Issue",
+    "description": "Pizza was cold and toppings were missing",
+    "email": "user@example.com"
   }'
 
-# Invalid transition test (should return 409)
-curl -X POST http://localhost:5000/api/webhook/delivery-update \
+# Submit complaint with phone
+curl -X POST http://localhost:5000/api/orders/60d5f484f4b7a5b8c8f8e123/complaint \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <token>" \
   -d '{
-    "orderId": "60d5f484f4b7a5b8c8f8e123",
-    "status": "pending",
-    "timestamp": "2024-03-15T17:45:00Z"
+    "complaintType": "Delivery Problem",
+    "description": "Order was delivered to wrong address and was late",
+    "phone": "+919876543210"
   }'
 
-# Missing fields test (should return 400)
-curl -X POST http://localhost:5000/api/webhook/delivery-update \
+# Submit complaint with both contact methods
+curl -X POST http://localhost:5000/api/orders/60d5f484f4b7a5b8c8f8e123/complaint \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <token>" \
   -d '{
-    "orderId": "60d5f484f4b7a5b8c8f8e123"
+    "complaintType": "Wrong Order",
+    "description": "Received different pizza than what was ordered",
+    "email": "user@example.com",
+    "phone": "+919876543210"
   }'
 
-# Non-existent order test (should return 404)
-curl -X POST http://localhost:5000/api/webhook/delivery-update \
+# Invalid complaint (missing contact method)
+curl -X POST http://localhost:5000/api/orders/60d5f484f4b7a5b8c8f8e123/complaint \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <token>" \
   -d '{
-    "orderId": "000000000000000000000000",
-    "status": "confirmed",
-    "timestamp": "2024-03-15T17:45:00Z"
+    "complaintType": "Quality Issue",
+    "description": "Pizza was cold"
   }'
 ```
 

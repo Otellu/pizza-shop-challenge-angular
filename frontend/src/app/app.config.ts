@@ -14,7 +14,6 @@ import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { AuthService } from './services/auth.service';
 import { APP_BASE_HREF } from '@angular/common';
-
 import { routes } from './app.routes';
 
 function authInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) {
@@ -54,7 +53,7 @@ function authInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) {
 export const appConfig: ApplicationConfig = {
   providers: [
     { provide: APP_BASE_HREF, useValue: '/absproxy/4200' },
-    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideZoneChangeDetection({ eventCoalescing: true }), 
     provideRouter(routes),
     provideHttpClient(withInterceptors([authInterceptor])),
   ],

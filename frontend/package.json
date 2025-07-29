@@ -13,7 +13,9 @@
     "test:evaluation": "npm run test:objective",
     "test:evaluation:verbose": "npm run test:objective -- --verbose",
     "test:evaluation:no-report": "npm run test:objective -- --no-report",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "e2e": "playwright test",
+    "e2e:headed": "playwright test --headed"
   },
   "private": true,
   "dependencies": {
@@ -26,7 +28,9 @@
     "@angular/platform-browser-dynamic": "^18.2.0",
     "@angular/router": "^18.2.0",
     "@ngrx/signals": "^18.1.1",
+    "@playwright/test": "^1.54.1",
     "autoprefixer": "^10.4.21",
+    "playwright": "^1.54.1",
     "postcss": "^8.5.6",
     "rxjs": "~7.8.0",
     "tailwindcss": "^3.4.17",
